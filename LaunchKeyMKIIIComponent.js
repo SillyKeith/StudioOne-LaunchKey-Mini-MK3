@@ -11,8 +11,8 @@
 const kPadCount = 16;
 const kBankCount = 8;
 
-include_file("resource://com.presonus.musicdevices/sdk/controlsurfacecomponent.js");
-include_file("resource://com.presonus.musicdevices/sdk/musicprotocol.js");
+include_file("./resources/controlsurfacecomponent.js");
+include_file("./resources/musicprotocol.js");
 include_file("Debug.js");
 include_file("Color.js");
 include_file("Modes.js");

@@ -8,7 +8,7 @@
  * @License: GPL-3
  */
 // include SDK files from host
-include_file("resource://com.presonus.musicdevices/sdk/controlsurfacecomponent.js");
+include_file("./resources/controlsurfacecomponent.js");
 include_file("Debug.js");
 include_file("Modes.js");
 

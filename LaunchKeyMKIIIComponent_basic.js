@@ -15,13 +15,10 @@ include_file("Debug.js");
 include_file("Modes.js");
 
 class LaunchKeyMK3BasicComponent extends PreSonus.ControlSurfaceComponent {
-    constructor() {
-        super();
-        this.interfaces = [Host.Interfaces.IObserver, Host.Interfaces.IParamObserver];
-    }
-
     onInit(hostComponent) {
         super.onInit(hostComponent);
+
+        this.interfaces = [Host.Interfaces.IObserver, Host.Interfaces.IParamObserver];
 
         this.model = hostComponent.model;
 
@@ -33,21 +30,39 @@ class LaunchKeyMK3BasicComponent extends PreSonus.ControlSurfaceComponent {
         Host.Signals.advise("LaunchkeyMK3", this);
     }
 
+    /**
+     * Handle the paramChanged event.
+     * @param {object} param - The changed parameter.
+     */
     paramChanged(param) {
         // Implementation needed if there's specific logic for paramChanged
     }
 
+    /**
+     * Handle the onSelectPressed event.
+     * @param {boolean} state - The state of the select button.
+     */
     onSelectPressed(state) {
         let commandName = this.shiftModifier.value ? "Cancel" : "Enter";
         Host.GUI.Commands.deferCommand("Navigation", commandName);
     }
 
+    /**
+     * Handle the notify event.
+     * @param {object} subject - The subject of the notification.
+     * @param {object} msg - The notification message.
+     */
     notify(subject, msg) {
         if (msg.id == 'paramChanged') {
             if (this[msg.getArg(0).name])
                 this[msg.getArg(0).name].setValue(msg.getArg(0).value, true);
             else if (this.modes.params[msg.getArg(0).name])
                 this.modes.params[msg.getArg(0).name].setValue(msg.getArg(0).value, true);
+            else {
+                // Handle unknown parameter
+            }
+        } else {
+            // Handle unknown notification
         }
     }
 }

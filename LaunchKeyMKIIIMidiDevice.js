@@ -171,50 +171,43 @@ function ButtonHoldHandler(name, status, address)
     }
 }
 
-LaunchKeyMK3ExtendedMidiDevice.prototype = new PreSonus.ControlSurfaceDevice ();
-function LaunchKeyMK3ExtendedMidiDevice()
-{
-    this.handlers = {};
-
-    this.idleListeners = [];
-
-    this.enableInControlMode = function( bool )
-    {
-        this.sendMidi(0x9F, 0x0C, (bool) ? 0x7F : 0x00);
+class LaunchKeyMK3ExtendedMidiDevice extends PreSonus.ControlSurfaceDevice {
+    constructor() {
+        super();
+        this.handlers = {};
+        this.idleListeners = [];
     }
 
-    this.onInit = function (hostDevice)
-    {
-        PreSonus.ControlSurfaceDevice.prototype.onInit.call (this, hostDevice);
+    enableInControlMode(bool) {
+        this.sendMidi(0x9F, 0x0C, bool ? 0x7F : 0x00);
     }
 
-    this.createHandler = function (name, attributes)
-    {
-        function getAttr( name )
-        {
+    onInit(hostDevice) {
+        super.onInit(hostDevice);
+    }
+
+    createHandler(name, attributes) {
+        const getAttr = (name) => {
             let attr = attributes.getAttribute(name);
-            if( ! attr )
-                return null;
+            if (!attr) return null;
 
-            if( typeof attr == 'string' )
-                return parseInt( attr.replace('#', '0x') );
+            if (typeof attr === 'string') return parseInt(attr.replace('#', '0x'));
             return attr;
         };
 
         let handler = null;
-        switch( attributes.getAttribute("class") )
-        {
+        switch (attributes.getAttribute("class")) {
             case "ColorLEDHandler":
-                handler = new ColorLEDHandler( name, getAttr('status'), getAttr('address') );
+                handler = new ColorLEDHandler(name, getAttr('status'), getAttr('address'));
                 break;
             case "ColorEffectHandler":
-                handler = new ColorEffectHandler( name, this.handlers[name.replace('Effect','LED')] );
+                handler = new ColorEffectHandler(name, this.handlers[name.replace('Effect', 'LED')]);
                 break;
             case "ColorStateHandler":
-                handler = new ColorStateHandler( name, this.handlers[name.replace('State','LED')] );
+                handler = new ColorStateHandler(name, this.handlers[name.replace('State', 'LED')]);
                 break;
             case "MonoLEDHandler":
-                handler = new MonoLEDHandler( name, getAttr('address') );
+                handler = new MonoLEDHandler(name, getAttr('address'));
                 break;
             case "ButtonHoldHandler":
                 handler = new ButtonHoldHandler(name, getAttr('status'), getAttr('address'));
@@ -228,44 +221,41 @@ function LaunchKeyMK3ExtendedMidiDevice()
                 break;
         }
 
-        if(!handler)
-            return false;
+        if (!handler) return false;
 
         this.handlers[name] = handler;
-
-        this.addHandler (handler);
+        this.addHandler(handler);
 
         return true;
     }
 
-    this.onIdle = function (time)
-    {
-        for( let i = 0; i < this.idleListeners.length; i++ )
+    onIdle(time) {
+        for (let i = 0; i < this.idleListeners.length; i++) {
             this.idleListeners[i].onIdle(time);
-    }
-
-    this.onMidiOutConnected = function (state)
-    {
-        PreSonus.ControlSurfaceDevice.prototype.onMidiOutConnected.call (this, state);
-
-        if(state)
-        {
-            this.log("Starting LaunchKey MK3 Extended");
-            // Reset Pads
-            this.enableInControlMode( false );
-            this.enableInControlMode( true );
-            this.sendMidi(0xBF, 0x03, 0x01);
-            this.hostDevice.invalidateAll ();
         }
     }
 
-    this.onExit = function ()
-    {
-        // Transmit native mode off message
-        this.sendMidi(0xBF, 0x03, 0x01);
-        this.enableInControlMode( false );
+    onMidiOutConnected(state) {
+        super.onMidiOutConnected(state);
 
-        PreSonus.ControlSurfaceDevice.prototype.onExit.call (this);
+        if (state) {
+            this.log("Starting LaunchKey MK3 Extended");
+            // Reset Pads
+            // This is required to reset the pads to their default state
+            this.enableInControlMode(false);
+            this.enableInControlMode(true);
+            this.sendMidi(PreSonus.Midi.kNoteOff | 0xBF, 0x03, 0x01);
+            this.hostDevice.invalidateAll();
+        }
+    }
+
+    onExit() {
+        // Transmit native mode off message
+        // This is required to return the device to its default state
+        // Added "PreSonus.Midi.kNoteOff |" to the sendMidi call
+        this.sendMidi(PreSonus.Midi.kNoteOff | 0xBF, 0x03, 0x01);
+        this.enableInControlMode(false);
+        super.onExit();
     }
 }
 

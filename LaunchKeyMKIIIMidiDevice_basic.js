@@ -182,11 +182,15 @@ class LaunchKeyMK3BasicDevice extends PreSonus.ControlSurfaceDevice {
         super.onMidiOutConnected(state);
         if (state) {
             this.log("Starting LaunchKey MK3 Basic");
+            // Mirroring the note off message sent to the device from LaunchKeyMK3BasicDevice
+            this.sendMidi(PreSonus.Midi.kNoteOff | 0xBF, 0x03, 0x01);
             this.hostDevice.invalidateAll();
         }
     }
 
     onExit() {
+        // Mirroring the note off message sent to the device from LaunchKeyMK3BasicDevice
+        this.sendMidi(PreSonus.Midi.kNoteOff | 0xBF, 0x03, 0x01);
         super.onExit();
     }
 }

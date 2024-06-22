@@ -142,15 +142,12 @@ function TouchDoubleTapHandler(name, channel)
     }
 }
 
-class LaunchKeyMK3ExtendedMidiDevice extends PreSonus.ControlSurfaceDevice {
+
+class LaunchKeyMK3BasicDevice extends PreSonus.ControlSurfaceDevice {
     constructor() {
         super();
         this.handlers = {};
         this.idleListeners = [];
-    }
-
-    enableInControlMode(bool) {
-        this.sendMidi(0x9F, 0x0C, bool ? 0x7F : 0x00);
     }
 
     onInit(hostDevice) {
@@ -158,45 +155,27 @@ class LaunchKeyMK3ExtendedMidiDevice extends PreSonus.ControlSurfaceDevice {
     }
 
     createHandler(name, attributes) {
-        const getAttr = (name) => {
-            let attr = attributes.getAttribute(name);
-            if (!attr) return null;
-
-            if (typeof attr === 'string') return parseInt(attr.replace('#', '0x'));
-            return attr;
-        };
-
+        let className = attributes.getAttribute("class");
         let handler = null;
-        switch (attributes.getAttribute("class")) {
-            case "ColorLEDHandler":
-                handler = new ColorLEDHandler(name, getAttr('status'), getAttr('address'));
+        let ch = parseInt(attributes.getAttribute("channel"));
+
+        switch (className) {
+            case "TouchModHandler":
+                handler = new TouchModHandler(name, ch);
                 break;
-            case "ColorEffectHandler":
-                handler = new ColorEffectHandler(name, this.handlers[name.replace('Effect', 'LED')]);
+            case "TouchPitchHandler":
+                handler = new TouchPitchHandler(name, ch);
                 break;
-            case "ColorStateHandler":
-                handler = new ColorStateHandler(name, this.handlers[name.replace('State', 'LED')]);
-                break;
-            case "MonoLEDHandler":
-                handler = new MonoLEDHandler(name, getAttr('address'));
-                break;
-            case "ButtonHoldHandler":
-                handler = new ButtonHoldHandler(name, getAttr('status'), getAttr('address'));
+            case "TouchDoubleTapHandler":
+                handler = new TouchDoubleTapHandler(name, ch);
                 this.idleListeners.push(handler);
-                this.addReceiveHandler(handler);
-                break;
-            case "ButtonHandler":
-                handler = new ButtonHandler(name, getAttr('status'), getAttr('address'));
-                let bind = attributes.getAttribute('bind');
-                this.handlers[bind].bindControlHandler(handler);
                 break;
         }
 
         if (!handler) return false;
 
         this.handlers[name] = handler;
-        this.addHandler(handler);
-
+        this.addReceiveHandler(handler);
         return true;
     }
 
@@ -208,29 +187,18 @@ class LaunchKeyMK3ExtendedMidiDevice extends PreSonus.ControlSurfaceDevice {
 
     onMidiOutConnected(state) {
         super.onMidiOutConnected(state);
-
         if (state) {
-            this.log("Starting LaunchKey MK3 Extended");
-            // Reset Pads
-            this.enableInControlMode(false);
-            this.enableInControlMode(true);
-            this.sendMidi(PreSonus.Midi.kNoteOff | 0xBF, 0x03, 0x01);
+            this.log("Starting LaunchKey MK3 Basic");
             this.hostDevice.invalidateAll();
         }
     }
 
     onExit() {
-        // Transmit native mode off message
-        // This is required to reset the device to a state where it can be used with other software
-        // The user will have to power cycle the device to use it with Studio One again
-        this.sendMidi(PreSonus.Midi.kNoteOff | 0xBF, 0x03, 0x01);
-        this.enableInControlMode(false);
         super.onExit();
     }
 }
 
 // factory entry called by host
-function createLaunchKeyMK3BasicDeviceInstance ()
-{
-    return new LaunchKeyMK3BasicDevice;
+function createLaunchKeyMK3BasicDeviceInstance() {
+    return new LaunchKeyMK3BasicDevice();
 }

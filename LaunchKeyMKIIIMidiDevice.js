@@ -14,141 +14,132 @@ include_file("./resources/controlsurfacedevice.js");
 include_file("Debug.js");
 include_file("Color.js");
 
-ColorLEDHandler.prototype = new PreSonus.ControlHandler ();
-function ColorLEDHandler (name, status, address)
-{
-    this.name = name;
-    this.status = status;
-    this.address = address;
-    this.effect = 0;
-    this.state = 1;
-    this.color;
-    this.value = 0x00;
+class ColorLEDHandler extends PreSonus.ControlHandler {
+    constructor(name, status, address) {
+        super();
+        this.name = name;
+        this.status = status;
+        this.address = address;
+        this.effect = 0;
+        this.state = 1;
+        this.color = undefined;
+        this.value = 0x00;
+    }
 
-    this.setState = function( _state )
-    {
+    setState(_state) {
         this.state = _state;
         this.update();
     }
 
-    this.setEffect = function( _effect )
-    {
-        this.sendMidi( this.status, this.address, 0x00 );
-
+    setEffect(_effect) {
+        this.sendMidi(this.status, this.address, 0x00);
         this.effect = _effect;
         this.update();
     }
 
-    this.sendValue = function( _value, _flags )
-    {
-        this.color = new Color( _value );
-
+    sendValue(_value, _flags) {
+        this.color = new Color(_value);
         this.value = this.color.midi;
         this.update();
     }
 
-    this.update = function()
-    {
-        let midi = ( this.state ) ? this.value : 0x00;
-        this.sendMidi( this.status|this.effect, this.address, midi );
+    update() {
+        let midi = (this.state) ? this.value : 0x00;
+        this.sendMidi(this.status | this.effect, this.address, midi);
     }
 }
 
-ColorEffectHandler.prototype = new PreSonus.ControlHandler ();
-function ColorEffectHandler(name, handler)
-{
-    this.name = name;
-    this.handler = handler;
+class ColorEffectHandler extends PreSonus.ControlHandler {
+    constructor(name, handler) {
+        super();
+        this.name = name;
+        this.handler = handler;
+    }
 
-    this.sendValue = function ( _value, _flags )
-    {
-        this.handler.setEffect( _value );
+    sendValue(_value, _flags) {
+        this.handler.setEffect(_value);
     }
 }
 
-ColorStateHandler.prototype = new PreSonus.ControlHandler();
-function ColorStateHandler( name, handler )
-{
-    this.name = name;
-    this.handler = handler;
-    this.handler.setState(0);
+class ColorStateHandler extends PreSonus.ControlHandler {
+    constructor(name, handler) {
+        super();
+        this.name = name;
+        this.handler = handler;
+        this.handler.setState(0);
+    }
 
-    this.sendValue = function( value, flags )
-    {
-        this.handler.setState( value );
+    sendValue(value, flags) {
+        this.handler.setState(value);
     }
 }
 
-MonoLEDHandler.prototype = new PreSonus.ControlHandler ();
-function MonoLEDHandler (name, address)
-{
-    this.name = name;
-    this.address = address;
+class MonoLEDHandler extends PreSonus.ControlHandler {
+    constructor(name, address) {
+        super();
+        this.name = name;
+        this.address = address;
+    }
 
-    this.sendValue = function ( _value, _flags )
-    {
+    sendValue(_value, _flags) {
         this.value = _value;
-        this.sendMidi( 0xBF, this.address, this.value );
+        this.sendMidi(0xBF, this.address, this.value);
     }
 }
 
-ButtonHandler.prototype = new PreSonus.ControlHandler ();
-function ButtonHandler(name, status, address)
-{
-    this.name = name;
-    this.status = status;
-    this.address = address;
+class ButtonHandler extends PreSonus.ControlHandler {
+    constructor(name, status, address) {
+        super();
+        this.name = name;
+        this.status = status;
+        this.address = address;
+    }
 }
 
-ButtonHoldHandler.prototype = new PreSonus.ControlHandler ();
-function ButtonHoldHandler(name, status, address)
-{
-    this.name = name;
-    this.status = status;
-    this.address = address;
-    this.altControl = null;
+class ButtonHoldHandler extends PreSonus.ControlHandler {
+    constructor(name, status, address) {
+        super();
+        this.name = name;
+        this.status = status;
+        this.address = address;
+        this.altControl = null;
 
-    this.timeout = 500;
-    this.activeTime = 0;
-    this.isPressed = false;
-    this.isHeld = false;
+        this.timeout = 500;
+        this.activeTime = 0;
+        this.isPressed = false;
+        this.isHeld = false;
+    }
 
-    this.onIdle = function(time)
-    {
-        if( ! this.isPressed || this.isHeld )
+    onIdle(time) {
+        if (!this.isPressed || this.isHeld)
             return;
 
-        if( ! this.activeTime )
+        if (!this.activeTime)
             this.activeTime = time;
 
-        if( time > this.activeTime + this.timeout )
-        {
+        if (time > this.activeTime + this.timeout) {
             this.updateValue(1);
             this.isHeld = true;
         }
     }
 
-    this.bindControlHandler = function( control )
-    {
+    bindControlHandler(control) {
         this.altControl = control;
     }
 
-    this.reset = function()
-    {
+    reset() {
         this.isPressed = false;
         this.isHeld = false;
         this.activeTime = 0;
     }
 
-    this.receiveMidi = function( status, address, value )
-    {
-        if( status != this.status || address != this.address )
+    receiveMidi(status, address, value) {
+        if (status != this.status || address != this.address)
             return false;
 
         // If the button press is release before reaching the timeout
         // then return false to allow another handler to handle the midi event
-        if( ! value && ! this.isHeld )
-        {
+        if (!value && !this.isHeld) {
             this.altControl.updateValue(1);
             this.altControl.updateValue(0);
             this.reset();
@@ -156,9 +147,8 @@ function ButtonHoldHandler(name, status, address)
         }
 
         // Button value of 0 will be a release
-        if( ! value )
-        {
-            if( this.isHeld )
+        if (!value) {
+            if (this.isHeld)
                 this.updateValue(0);
             else
                 this.altControl.updateValue(0);

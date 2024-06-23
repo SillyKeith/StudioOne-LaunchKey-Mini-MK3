@@ -4,164 +4,139 @@ const Effect = {
     PULSE: 2
 };
 
-function Channel()
-{
-    this.connectPot = function( element, paramName )
-    {
-        if( ! paramName )
-        {
+class Channel {
+    constructor() {
+        this.channelElement = null; // Assuming initialization elsewhere or to be added
+        this.potValue = null; // Assuming initialization elsewhere or to be added
+        this.padSelect = null; // Assuming initialization elsewhere or to be added
+        this.padSelectColor = null; // Assuming initialization elsewhere or to be added
+        this.padToggle = null; // Assuming initialization elsewhere or to be added
+        this.padToggleColor = null; // Assuming initialization elsewhere or to be added
+        this.padToggleEffect = null; // Assuming initialization elsewhere or to be added
+        this.padSelectEffect = null; // Assuming initialization elsewhere or to be added
+        this.genericElement = null; // Assuming initialization elsewhere or to be added
+    }
+
+    connectPot(element, paramName) {
+        if (!paramName) {
             paramName = element;
             element = this.channelElement;
         }
         return element.connectAliasParam(this.potValue, paramName);
     }
 
-    this.connectSelect = function( paramName )
-    {
+    connectSelect(paramName) {
         return this.channelElement.connectAliasParam(this.padSelect, paramName);
     }
 
-    this.connectSelectColor = function( paramName )
-    {
+    connectSelectColor(paramName) {
         return this.channelElement.connectAliasParam(this.padSelectColor, paramName);
     }
 
-    this.connectToggle = function( element, paramName )
-    {
-        if( ! paramName )
-        {
+    connectToggle(element, paramName) {
+        if (!paramName) {
             paramName = element;
             element = this.channelElement;
         }
         return element.connectAliasParam(this.padToggle, paramName);
     }
 
-    this.updateSelectEffect = function()
-    {
-        if( this.channelElement.getParamValue('selected') )
-            return this.padSelectEffect.setValue( Effect.PULSE );
+    updateSelectEffect() {
+        if (this.channelElement.getParamValue('selected'))
+            return this.padSelectEffect.setValue(Effect.PULSE);
 
-        this.padSelectEffect.setValue( Effect.NONE );
+        this.padSelectEffect.setValue(Effect.NONE);
     }
 
-    this.updateToggle = function( color_off, color_on, effect )
-    {
-        if( this.padToggle.value == null )
-        {
+    updateToggle(color_off, color_on, effect) {
+        if (this.padToggle.value == null) {
             this.padToggleColor.setValue(0);
-            this.padToggleEffect.setValue( Effect.NONE );
+            this.padToggleEffect.setValue(Effect.NONE);
             return;
         }
 
-        this.padToggleColor.fromString( (this.padToggle.value) ? color_on : color_off );
+        this.padToggleColor.fromString((this.padToggle.value) ? color_on : color_off);
 
-        if( effect && this.padToggle.value )
-        {
-            this.padToggleEffect.setValue( effect );
+        if (effect && this.padToggle.value) {
+            this.padToggleEffect.setValue(effect);
         } else {
-            this.padToggleEffect.setValue( Effect.NONE );
+            this.padToggleEffect.setValue(Effect.NONE);
         }
     }
 
-    this.setPotGeneric = function()
-    {
+    setPotGeneric() {
         this.genericElement.connectAliasParam(this.potValue, 'value');
     }
 
-    this.setToggleGeneric = function()
-    {
+    setToggleGeneric() {
         this.genericElement.connectAliasParam(this.padToggle, 'value');
     }
 
-    this.setSelectGeneric = function()
-    {
+    setSelectGeneric() {
         this.genericElement.connectAliasParam(this.padSelect, 'value');
         this.genericElement.connectAliasParam(this.padSelectColor, 'value');
     }
 
-    this.setPadGeneric = function()
-    {
+    setPadGeneric() {
         this.setToggleGeneric();
         this.setSelectGeneric();
     }
 }
 
-function PadMode()
-{
-    this.effectParams;
+class PadMode {
+    constructor() {
+        this.effectParams = [];
+        this.renderHandlers = [];
+        this.activeRenderHandlers = [];
+    }
 
-    this.init = function( index, component )
-    {
+    init(index, component) {
         this.index = index;
         this.component = component;
         this.handler = component.getHandler(index);
     }
 
-    this.addRenderHandler = function( func )
-    {
-        if( ! this.renderHandlers )
-            this.renderHandlers = [];
-        this.renderHandlers.push( func.bind(this) );
+    addRenderHandler(func) {
+        this.renderHandlers.push(func.bind(this));
     }
 
-    this.render = function( host, root )
-    {
+    render(host, root) {
         this.resetEffects();
-
-        if( ! this.renderHandlers )
-            return;
-
-        for( let i = 0; i < this.renderHandlers.length; i++ )
-            this.renderHandlers[i]( host, root );
+        this.renderHandlers.forEach(handler => handler(host, root));
     }
 
-    this.addActiveRenderHandler = function( func )
-    {
-        if( ! this.activeRenderHandlers )
-            this.activeRenderHandlers = [];
-        this.activeRenderHandlers.push( func.bind(this) );
+    addActiveRenderHandler(func) {
+        this.activeRenderHandlers.push(func.bind(this));
     }
 
-    // Used for sub buttons like scene and their statees as they are statically defined
-    this.activeRender = function( host, root )
-    {
+    activeRender(host, root) {
         // Reset the scene button
         host.modes.params.scene_button.color.setValue(0);
         host.modes.params.scene_button.effect.setValue(0);
         host.modes.params.ssm_button.color.setValue(0);
         host.modes.params.ssm_button.effect.setValue(0);
 
-        if( ! this.activeRenderHandlers )
-            return;
-
-        for( let i = 0; i < this.activeRenderHandlers.length; i++ )
-            this.activeRenderHandlers[i]( host, root );
+        this.activeRenderHandlers.forEach(handler => handler(host, root));
     }
 
-    this.setColor = function( pad, value )
-    {
-        if( value.charAt(0) == '#')
-        {
+    setColor(pad, value) {
+        if (value.charAt(0) === '#') {
             value = Color.hexToInt(value);
         }
         return this.component.setPadColor(pad, value);
     }
 
-    this.toggle = function( pad, value, color_off, color_on )
-    {
+    toggle(pad, value, color_off, color_on) {
         this.component.setPadState(pad, true);
-        return this.setColor(pad, (value) ? color_on : color_off );
+        return this.setColor(pad, value ? color_on : color_off);
     }
 
-    this.setEffect = function( pad, effect )
-    {
+    setEffect(pad, effect) {
         this.effectParams[pad].setValue(effect);
     }
 
-    this.resetEffects = function()
-    {
-        for( let i = 0; i < this.effectParams.length; i++ )
-            this.effectParams[i].setValue( Effect.NONE );
+    resetEffects() {
+        this.effectParams.forEach(param => param.setValue(Effect.NONE));
     }
 }
 

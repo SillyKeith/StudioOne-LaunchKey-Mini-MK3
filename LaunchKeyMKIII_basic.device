@@ -9,6 +9,9 @@
 
     nativeCode="JSKeyboardDevice"
     surfaceFile="LaunchKeyMKIII_basic.surface.xml"
+    
+    imageFile="LaunchKeyMKIII.png"
+    textFile="LaunchKeyMKIII.txt"
 
     classFile="LaunchKeyMKIIIMidiDevice_basic.js"
     classFile.functionName="createLaunchKeyMK3BasicDeviceInstance"

@@ -8,7 +8,7 @@ First, you must understand about Studio One's ***"Focus mode"***. You can avoid 
 
 *Yellow button on in the upper right hand corner of the plugin window indicates focus mode.*
 
-(./resources/S1-focus-mode.png)
+![Focus-mode](./resources/S1-focus-mode.png)
 
 When you are in global mode (same button is not yellow), your MIDI knobs continue to control the plugin even if its window is not in focus.
 

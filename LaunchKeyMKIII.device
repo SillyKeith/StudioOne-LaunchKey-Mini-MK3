@@ -16,6 +16,9 @@
 
     surfaceFile="LaunchKeyMKIII.surface.xml"
 
+    imageFile="LaunchKeyMKIII.png"
+    textFile="LaunchKeyMKIII.txt"
+    
     skinFile="skin/"
     formName="Novation LaunchKeyMKIII"
 

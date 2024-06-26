@@ -12,4 +12,4 @@ First, you must understand about Studio One's ***"Focus mode"***. You can avoid 
 
 When you are in global mode (same button is not yellow), your MIDI knobs continue to control the plugin even if its window is not in focus.
 
-Presonus Studio One Surface/Device mapping cheatsheet (./resources/Presonus-Studio-One-suface-XML-cheatsheet.png)
+Presonus Studio One Surface/Device mapping cheatsheet ![Cheetsheet](./resources/Presonus-Studio-One-suface-XML-cheatsheet.png)

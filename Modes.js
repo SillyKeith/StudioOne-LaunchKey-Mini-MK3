@@ -469,6 +469,9 @@ function Modes( hostComponent, bankCount )
     **/
     this._getModeByIndex = function( modeArr, i )
     {
+        if (i < 0 || i >= modeArr.length || !modeArr[i]) {
+            return null; // Or handle the error as appropriate but without this the code will crash modeArr[i] undefined.
+        }
         if( ! modeArr[i].index )
             modeArr[i].index = i;
         return modeArr[i];
@@ -485,12 +488,26 @@ function Modes( hostComponent, bankCount )
 
     this.getNextMode = function( modeArr, fromIndex, checkSkip )
     {
-        fromIndex++;
-        if( fromIndex > modeArr.length - 1 )
+        if (modeArr.length === 0) {
+            // console.error("modeArr is empty");
+            return null; // Or handle the error as appropriate but without this the code will crash modeArr[i] undefined.
+        }
+        
+        let originalIndex = fromIndex;
+        do {
+            fromIndex++;
+            if( fromIndex > modeArr.length - 1 )
             fromIndex = 0;
+        
+            // Prevent infinite loop if all modes should be skipped
+            if (fromIndex === originalIndex) {
+                // console.error("All modes are skipped or only one mode available");
+                return null; // Or handle as appropriate
+            }
 
-        if( checkSkip && modeArr[fromIndex].skip )
-            return this.getNextMode( modeArr, fromIndex, checkSkip );
+    } while (checkSkip && modeArr[fromIndex] && modeArr[fromIndex].skip);
+        // if( checkSkip && modeArr[fromIndex].skip )
+        //    return this.getNextMode( modeArr, fromIndex, checkSkip );
 
         return this._getModeByIndex(modeArr, fromIndex);
     }

@@ -131,39 +131,49 @@ class LaunchKeyMK3ExtendedComponent extends PreSonus.ControlSurfaceComponent {
         this.log ("paramChanged value changed to " + param.value);
         switch (param) {
             case this.modes.params.device_pad:
+                this.log("Entered device_pad case");
                 this.renderDrumMode();
                 this.renderSessionMode();
                 break;
-
+    
             case this.modes.params.device_pot:
+                this.log("Entered device_pot case");
                 return this.updateChannels();
-
+    
             case this.sceneHold:
+                this.log("Entered sceneHold case");
                 return this.modes.setModifierActive(param.value);
-
+    
             case this.modes.params.focus:
+                this.log("Entered focus case");
                 return this.modes.setPadFocusWhenPressed(param.value);
-
+    
             case this.modes.params.drum:
+                this.log("Entered drum case");
                 return this.renderDrumMode();
-
+    
             case this.modes.params.session:
+                this.log("Entered session case");
                 return this.renderSessionMode();
-
+    
             case this.modes.params.hui:
+                this.log("Entered hui case");
                 return this.renderHuiMode();
-
+    
             case this.fullVelocityMode:
+                this.log("Entered fullVelocityMode case");
                 return this.modes.setFullVelocityMode(param.value);
-
+    
             case this.bankMenu:
+                this.log("Entered bankMenu case");
                 return this.modes.setCurrentBank(param.value);
-
+    
             case this.bankList:
+                this.log("Entered bankList case");
                 this.channelBankElement.selectBank(this.bankList.string);
                 this.onHuiScrollOptions(this.sceneHold.value);
                 return;
-
+    
         }
     }
 
@@ -442,7 +452,7 @@ class LaunchKeyMK3ExtendedComponent extends PreSonus.ControlSurfaceComponent {
         }
 
         updateChannel = function (i) {
-            this.log ("updateChannel- What mode are we in:" + this.modes.getCurrentSessionMode().id);
+            // this.log ("updateChannel- What mode are we in:" + this.modes.getCurrentSessionMode().id);
             if (this.modes.getCurrentSessionMode().id != 'hui')
                 return;
 

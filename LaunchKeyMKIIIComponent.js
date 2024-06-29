@@ -20,11 +20,11 @@ include_file("Modes.js");
 class LaunchKeyMK3ExtendedComponent extends PreSonus.ControlSurfaceComponent {
     onInit(hostComponent) {
         super.onInit(hostComponent);
-
+        this.debugLog = false;  // Set to true to enable debug logging
         this.model = hostComponent.model;
         let root = this.model.root;
 
-        // Elements initialization
+        // Elements initialization. This is looking inside the LaunchKeyMKIII.surface.xml file for the elements
         this.padSessionSection = root.find("PadSessionSectionElement");
         this.padDrumSection = root.find("PadDrumSectionElement");
         this.padUserDefinedSection = root.find("PadUserDefinedSectionElement");

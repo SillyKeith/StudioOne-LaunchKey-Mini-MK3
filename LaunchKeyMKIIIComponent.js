@@ -128,8 +128,7 @@ class LaunchKeyMK3ExtendedComponent extends PreSonus.ControlSurfaceComponent {
 
     paramChanged = function (param) {
         Host.Signals.signal("LaunchKeyMK3", 'paramChanged', param);
-        this.log ("Hello World");
-        this.log ("Hello World");
+        this.log ("paramChanged value changed to " + param.value);
         switch (param) {
             case this.modes.params.device_pad:
                 this.renderDrumMode();
@@ -492,7 +491,7 @@ class LaunchKeyMK3ExtendedComponent extends PreSonus.ControlSurfaceComponent {
         }
 
         notify = function (subject, msg) {
-            log(subject + ': ' + msg.id);
+            log("notify function" + subject + ': ' + msg.id);
             if (msg.id == PreSonus.HostUtils.kTrackEditorChanged)
                 this.onTrackEditorChanged(msg.getArg(0));
 

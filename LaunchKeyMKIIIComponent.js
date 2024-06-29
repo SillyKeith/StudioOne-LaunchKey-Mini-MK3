@@ -128,7 +128,8 @@ class LaunchKeyMK3ExtendedComponent extends PreSonus.ControlSurfaceComponent {
 
     paramChanged = function (param) {
         Host.Signals.signal("LaunchKeyMK3", 'paramChanged', param);
-
+        this.log ("Hello World");
+        this.log ("Hello World");
         switch (param) {
             case this.modes.params.device_pad:
                 this.renderDrumMode();
@@ -336,7 +337,7 @@ class LaunchKeyMK3ExtendedComponent extends PreSonus.ControlSurfaceComponent {
     renderDrumMode = function () {
         this.modes.activateDrumHandler();
         this.modes.getCurrentDrumMode().render(this, this.model.root);
-
+        this.log ("renderDrumMode: " + this.modes.isDrumMode());
         if (this.modes.isDrumMode()) {
             this.modes.getCurrentDrumMode().activeRender(this, this.model.root);
             if (this.noteRepeatElement.getParamValue(PreSonus.NoteRepeat.kActive)) {
@@ -356,7 +357,7 @@ class LaunchKeyMK3ExtendedComponent extends PreSonus.ControlSurfaceComponent {
 
     renderSessionMode = function () {
         let mode = this.modes.getCurrentSessionMode();
-
+        this.log ("renderSessionMode fuction: " + mode.id);
         switch (mode.id) {
             case 'bank':
                 this.bankMenu.value = this.padSessionSection.component.getCurrentBank(); // make sure value is up-to-date

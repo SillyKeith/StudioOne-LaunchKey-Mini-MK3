@@ -20,7 +20,7 @@ include_file("Modes.js");
 class LaunchKeyMK3ExtendedComponent extends PreSonus.ControlSurfaceComponent {
     onInit(hostComponent) {
         super.onInit(hostComponent);
-        this.debugLog = false;  // Set to true to enable debug logging
+        this.debugLog = true;  // Set to true to enable debug logging
         this.model = hostComponent.model;
         let root = this.model.root;
 
@@ -442,6 +442,7 @@ class LaunchKeyMK3ExtendedComponent extends PreSonus.ControlSurfaceComponent {
         }
 
         updateChannel = function (i) {
+            this.log ("updateChannel- What mode are we in:" + this.modes.getCurrentSessionMode().id);
             if (this.modes.getCurrentSessionMode().id != 'hui')
                 return;
 

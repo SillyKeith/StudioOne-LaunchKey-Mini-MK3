@@ -164,7 +164,7 @@
         <Control name="drumPadState[7]"            options="transmit fastupdate"> <Handler class="ColorStateHandler" /> </Control>
         <Control name="drumPadEffect[7]"           options="transmit fastupdate"> <Handler class="ColorEffectHandler" /> </Control>
 
-<!-- Make the knobs pageable by including this as an option Ex: options="receive public pageable" -->
+        <!-- Make the knobs pageable by including this as an option Ex: options="receive public pageable" -->
         <Control name="knob[0]" title="Tempo" type="knob" options="receive public pageable">
             <MidiMessage status="Controller" address="#15" />
         </Control>

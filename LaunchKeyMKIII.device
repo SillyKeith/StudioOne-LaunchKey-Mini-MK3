@@ -19,7 +19,7 @@
     imageFile="LaunchKeyMKIII.png"
     textFile="LaunchKeyMKIII.txt"
     
-    skinFile="skin/"
+    skinFile="./skin/skin.xml"
     formName="Novation LaunchKeyMKIII"
 
     hostDataFile="LaunchKeyMKIII.surfacedata"

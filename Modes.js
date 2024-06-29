@@ -6,15 +6,15 @@ const Effect = {
 
 class Channel {
     constructor() {
-        this.channelElement = null; // Assuming initialization elsewhere or to be added
-        this.potValue = null; // Assuming initialization elsewhere or to be added
-        this.padSelect = null; // Assuming initialization elsewhere or to be added
-        this.padSelectColor = null; // Assuming initialization elsewhere or to be added
-        this.padToggle = null; // Assuming initialization elsewhere or to be added
-        this.padToggleColor = null; // Assuming initialization elsewhere or to be added
-        this.padToggleEffect = null; // Assuming initialization elsewhere or to be added
-        this.padSelectEffect = null; // Assuming initialization elsewhere or to be added
-        this.genericElement = null; // Assuming initialization elsewhere or to be added
+        this.channelElement = 0; // Assuming initialization elsewhere or to be added
+        this.potValue = 0; // Assuming initialization elsewhere or to be added
+        this.padSelect = 0; // Assuming initialization elsewhere or to be added
+        this.padSelectColor = 0; // Assuming initialization elsewhere or to be added
+        this.padToggle = 0; // Assuming initialization elsewhere or to be added
+        this.padToggleColor = 0; // Assuming initialization elsewhere or to be added
+        this.padToggleEffect = 0; // Assuming initialization elsewhere or to be added
+        this.padSelectEffect = 0; // Assuming initialization elsewhere or to be added
+        this.genericElement = 0; // Assuming initialization elsewhere or to be added
     }
 
     connectPot(element, paramName) {

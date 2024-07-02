@@ -17,7 +17,7 @@ include_file("Modes.js");
 class LaunchKeyMK3BasicComponent extends PreSonus.ControlSurfaceComponent {
     onInit(hostComponent) {
         super.onInit(hostComponent);
-
+        this.debugLog = true;
         this.interfaces = [Host.Interfaces.IObserver, Host.Interfaces.IParamObserver];
 
         this.model = hostComponent.model;
@@ -53,6 +53,7 @@ class LaunchKeyMK3BasicComponent extends PreSonus.ControlSurfaceComponent {
      * @param {object} msg - The notification message.
      */
     notify(subject, msg) {
+        this.log("notify function" + subject + ': ' + msg.id);
         if (msg.id == 'paramChanged') {
             if (this[msg.getArg(0).name])
                 this[msg.getArg(0).name].setValue(msg.getArg(0).value, true);

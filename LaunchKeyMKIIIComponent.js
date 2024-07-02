@@ -501,7 +501,7 @@ class LaunchKeyMK3ExtendedComponent extends PreSonus.ControlSurfaceComponent {
         }
 
         notify = function (subject, msg) {
-            log("notify function" + subject + ': ' + msg.id);
+            this.log("notify function" + subject + ': ' + msg.id);
             if (msg.id == PreSonus.HostUtils.kTrackEditorChanged)
                 this.onTrackEditorChanged(msg.getArg(0));
 

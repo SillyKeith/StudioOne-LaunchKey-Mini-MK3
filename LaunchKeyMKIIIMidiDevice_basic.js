@@ -145,6 +145,7 @@ class LaunchKeyMK3BasicDevice extends PreSonus.ControlSurfaceDevice {
 
     onInit(hostDevice) {
         super.onInit(hostDevice);
+        this.debugLog = true;
     }
 
     createHandler(name, attributes) {

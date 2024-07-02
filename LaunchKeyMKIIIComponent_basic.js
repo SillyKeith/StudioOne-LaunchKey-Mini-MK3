@@ -53,7 +53,7 @@ class LaunchKeyMK3BasicComponent extends PreSonus.ControlSurfaceComponent {
      * @param {object} msg - The notification message.
      */
     notify(subject, msg) {
-        this.log("notify function" + subject + ': ' + msg.id);
+        this.log("Component_basic.js notify function" + subject + ': ' + msg.id);
         if (msg.id == 'paramChanged') {
             if (this[msg.getArg(0).name])
                 this[msg.getArg(0).name].setValue(msg.getArg(0).value, true);

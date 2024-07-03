@@ -28,6 +28,8 @@ class LaunchKeyMK3BasicComponent extends PreSonus.ControlSurfaceComponent {
 
         this.modes = new Modes(hostComponent);
         Host.Signals.advise("LaunchkeyMK3", this);
+        this.log("LaunchKeyMK3BasicComponent initialized");
+        this.log("interface: " + this.interfaces + " paramList: " + paramList + " modes: " + this.modes + " model: " + this.model); 
     }
 
     /**

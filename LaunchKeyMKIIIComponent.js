@@ -23,6 +23,8 @@ class LaunchKeyMK3ExtendedComponent extends PreSonus.ControlSurfaceComponent {
         this.debugLog = true;  // Set to true to enable debug logging
         this.model = hostComponent.model;
         let root = this.model.root;
+        this.log("LaunchKeyMK3ExtendedComponent initialized");
+        this.log("model=" + this.model + "root=" + root);
 
         // Elements initialization. This is looking inside the LaunchKeyMKIII.surface.xml file for the elements
         this.padSessionSection = root.find("PadSessionSectionElement");
@@ -38,6 +40,7 @@ class LaunchKeyMK3ExtendedComponent extends PreSonus.ControlSurfaceComponent {
         // Params initialization
         let paramList = hostComponent.paramList;
         this.modes = new Modes(hostComponent, kBankCount);
+        this.log("paramList=" + paramList + "modes=" + this.modes);
         this.shiftModifier = paramList.addParam("shiftModifier");
         this.sceneHold = paramList.addParam("sceneHold");
         this.playLED = paramList.addInteger(0, 0x7F, "playLED");

@@ -11,6 +11,7 @@
 // include_file("resource://com.presonus.musicdevices/sdk/controlsurfacecomponent.js");
 // include_file("resource://com.presonus.musicdevices/sdk/controlsurfacedevice.js");
 include_file("./resources/controlsurfacecomponent.js");
+include_file("./resources/controlsurfacedevice.js");
 include_file("Debug.js");
 include_file("Modes.js");
 

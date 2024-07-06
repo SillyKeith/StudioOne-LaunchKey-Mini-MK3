@@ -161,21 +161,35 @@ function DevicePadMode(id)
 Modes.DevicePadModes = [
     new DevicePadMode('custom'),
     new DevicePadMode('drum'),
-    new DevicePadMode('session')
+    new DevicePadMode('session'),
+    new DevicePadMode('ScaleChords'),
+    new DevicePadMode('UserChords'),
+    new DevicePadMode('CustomMode0'),
+    new DevicePadMode('CustomMode1'),
+    new DevicePadMode('CustomMode2'),
+    new DevicePadMode('CustomMode3'),
+    new DevicePadMode('DeviceSelect'),
+    new DevicePadMode('Navigation'),
 ];
 
-DevicePotMode = function(id)
-{
+function DevicePotMode(id) {
     this.id = id;
-};
-Modes.DevicePotModes = [
-    new DevicePotMode('custom'),
-    new DevicePotMode('volume'),
-    new DevicePotMode('device'),
-    new DevicePotMode('pan'),
-    new DevicePotMode('sendA'),
-    new DevicePotMode('sendB')
-];
+}
+
+Modes.DevicePotModes = ['custom', 'volume', 'device', 'pan', 'sendA', 'sendB'].map(id => new DevicePotMode(id));
+
+//DevicePotMode = function(id)
+//{
+//    this.id = id;
+//};
+//Modes.DevicePotModes = [
+//    new DevicePotMode('custom'),
+//    new DevicePotMode('volume'),
+//    new DevicePotMode('device'),
+//    new DevicePotMode('pan'),
+//    new DevicePotMode('sendA'),
+//    new DevicePotMode('sendB')
+//];
 
 
 SessionMode.EffectParams = [];
@@ -469,8 +483,8 @@ function Modes( hostComponent, bankCount )
     **/
     this._getModeByIndex = function( modeArr, i )
     {
-        if (i < 0 || i >= modeArr.length || !modeArr[i]) {
-            return null; // Or handle the error as appropriate but without this the code will crash modeArr[i] undefined.
+        if (i == null || i >= modeArr.length || !modeArr[i]) {
+            i=0; // Or handle the error as appropriate but without this the code will crash modeArr[i] undefined.
         }
         if( ! modeArr[i].index )
             modeArr[i].index = i;
@@ -514,6 +528,12 @@ function Modes( hostComponent, bankCount )
 
     this.getDevicePadMode = function( id )
     {
+        if (id == null || id > 2) {
+            // console.error("Device pad mode index out of bounds");
+            // Null and All other PAD modes are not coded so we go to Session layout (2). 
+            // The code will crash modeArr[i] undefined.
+            id=2;
+        }
         return this.getModeById( Modes.DevicePadModes, id );
     }
 
@@ -598,6 +618,10 @@ function Modes( hostComponent, bankCount )
 
     this.isDrumMode = function()
     {
+        if (this.getCurrentDevicePadMode() == null) {
+            // console.error("Current device pad mode is null");
+            return false;
+        }
         return this.getCurrentDevicePadMode().id == 'drum';
     }
 

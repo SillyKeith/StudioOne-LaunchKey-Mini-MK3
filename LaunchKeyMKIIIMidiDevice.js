@@ -196,6 +196,7 @@ class LaunchKeyMK3ExtendedMidiDevice extends PreSonus.ControlSurfaceDevice {
     }
 
     createHandler(name, attributes) {
+        let className = attributes.getAttribute("class");
         const getAttr = (name) => {
             let attr = attributes.getAttribute(name);
             if (!attr) return null;
@@ -205,7 +206,7 @@ class LaunchKeyMK3ExtendedMidiDevice extends PreSonus.ControlSurfaceDevice {
         };
 
         let handler = null;
-        switch (attributes.getAttribute("class")) {
+        switch (className) {
             case "ColorLEDHandler":
                 handler = new ColorLEDHandler(name, getAttr('status'), getAttr('address'));
                 break;

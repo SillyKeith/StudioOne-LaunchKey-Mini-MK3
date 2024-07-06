@@ -64,9 +64,11 @@ class LaunchKeyMK3BasicComponent extends PreSonus.ControlSurfaceComponent {
                 this.modes.params[msg.getArg(0).name].setValue(msg.getArg(0).value, true);
             else {
                 // Handle unknown parameter
+                this.log("Unknown paramater received" + subject + ': ' + msg.id);
             }
         } else {
             // Handle unknown notification
+            this.log("Unknown notification received" + subject + ': ' + msg.id);
         }
     }
 }

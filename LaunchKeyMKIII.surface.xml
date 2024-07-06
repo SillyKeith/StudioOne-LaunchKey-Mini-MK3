@@ -193,7 +193,7 @@
         <Control name="devicePadMode" title="Device Pad Mode" options="transmit receive">
             <MidiMessage status="#B0" channel="15" address="3" />
         </Control>
-
+        <!-- Device Pot Mode -->
         <Control name="devicePotMode" title="Device Pot Mode" options="transmit receive">
             <MidiMessage status="#B0" channel="15" address="9" />
         </Control>

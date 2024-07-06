@@ -24,7 +24,7 @@ class LaunchKeyMK3ExtendedComponent extends PreSonus.ControlSurfaceComponent {
         this.model = hostComponent.model;
         let root = this.model.root;
         this.log("LaunchKeyMK3ExtendedComponent initialized");
-        this.log("model=" + this.model + "root=" + root);
+        //this.log("model=" + this.model + "root=" + root);
 
         // Elements initialization. This is looking inside the LaunchKeyMKIII.surface.xml file for the elements
         this.padSessionSection = root.find("PadSessionSectionElement");
@@ -40,7 +40,7 @@ class LaunchKeyMK3ExtendedComponent extends PreSonus.ControlSurfaceComponent {
         // Params initialization
         let paramList = hostComponent.paramList;
         this.modes = new Modes(hostComponent, kBankCount);
-        this.log("paramList=" + paramList + "modes=" + this.modes);
+        //this.log("paramList=" + paramList + "modes=" + this.modes);
         this.shiftModifier = paramList.addParam("shiftModifier");
         this.sceneHold = paramList.addParam("sceneHold");
         this.playLED = paramList.addInteger(0, 0x7F, "playLED");
@@ -131,7 +131,7 @@ class LaunchKeyMK3ExtendedComponent extends PreSonus.ControlSurfaceComponent {
 
     paramChanged = function (param) {
         Host.Signals.signal("LaunchKeyMK3", 'paramChanged', param);
-        this.log ("paramChanged value changed to " + param.value);
+        //this.log ("paramChanged value changed to " + param.value);
         switch (param) {
             case this.modes.params.device_pad:
                 this.log("Entered device_pad case");
@@ -504,7 +504,7 @@ class LaunchKeyMK3ExtendedComponent extends PreSonus.ControlSurfaceComponent {
         }
 
         notify = function (subject, msg) {
-            this.log("Component.js notify function" + subject + ': ' + msg.id);
+            //this.log("Component.js notify function" + subject + ': ' + msg.id);
             if (msg.id == PreSonus.HostUtils.kTrackEditorChanged)
                 this.onTrackEditorChanged(msg.getArg(0));
 

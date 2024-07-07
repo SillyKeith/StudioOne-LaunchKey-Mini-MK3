@@ -200,7 +200,7 @@ class LaunchKeyMK3ExtendedMidiDevice extends PreSonus.ControlSurfaceDevice {
         const getAttr = (name) => {
             let attr = attributes.getAttribute(name);
             if (!attr) return null;
-
+            this.log("createHandler className: " + className + "attr: " + attr);
             if (typeof attr === 'string') return parseInt(attr.replace('#', '0x'));
             return attr;
         };

@@ -164,36 +164,35 @@
         <Control name="drumPadState[7]"            options="transmit fastupdate"> <Handler class="ColorStateHandler" /> </Control>
         <Control name="drumPadEffect[7]"           options="transmit fastupdate"> <Handler class="ColorEffectHandler" /> </Control>
 
-        <!-- Make the knobs pageable by including this as an option Ex: options="receive public pageable" -->
-        <Control name="knob[0]" title="Tempo" type="knob" options="receive public pageable">
+        <Control name="knob[0]" title="Tempo" type="knob" options="receive public">
             <MidiMessage status="Controller" address="#15" />
         </Control>
-        <Control name="knob[1]" title="Swing" type="knob" options="receive public pageable">
+        <Control name="knob[1]" title="Swing" type="knob" options="receive public">
             <MidiMessage status="Controller" address="#16" />
         </Control>
-        <Control name="knob[2]" title="Gate" type="knob" options="receive public pageable">
+        <Control name="knob[2]" title="Gate" type="knob" options="receive public">
             <MidiMessage status="Controller" address="#17" />
         </Control>
-        <Control name="knob[3]" title="Mutate" type="knob" options="receive public pageable">
+        <Control name="knob[3]" title="Mutate" type="knob" options="receive public">
             <MidiMessage status="Controller" address="#18" />
         </Control>
-        <Control name="knob[4]" title="Deviate" type="knob" options="receive public pageable">
+        <Control name="knob[4]" title="Deviate" type="knob" options="receive public">
             <MidiMessage status="Controller" address="#19" />
         </Control>
-        <Control name="knob[5]" title="Knob 6" type="knob" options="receive public pageable">
+        <Control name="knob[5]" title="Knob 6" type="knob" options="receive public">
             <MidiMessage status="Controller" address="#1A" />
         </Control>
-        <Control name="knob[6]" title="Knob 7" type="knob" options="receive public pageable">
+        <Control name="knob[6]" title="Knob 7" type="knob" options="receive public">
             <MidiMessage status="Controller" address="#1B" />
         </Control>
-        <Control name="knob[7]" title="Knob 8" type="knob" options="receive public pageable">
+        <Control name="knob[7]" title="Knob 8" type="knob" options="receive public">
             <MidiMessage status="Controller" address="#1C" />
         </Control>
 
         <Control name="devicePadMode" title="Device Pad Mode" options="transmit receive">
             <MidiMessage status="#B0" channel="15" address="3" />
         </Control>
-        <!-- Device Pot Mode -->
+
         <Control name="devicePotMode" title="Device Pot Mode" options="transmit receive">
             <MidiMessage status="#B0" channel="15" address="9" />
         </Control>

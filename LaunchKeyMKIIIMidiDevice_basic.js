@@ -187,7 +187,7 @@ class LaunchKeyMK3BasicDevice extends PreSonus.ControlSurfaceDevice {
             // Mirroring the note off message sent to the device from LaunchKeyMK3BasicDevice
             // this.sendMidi(PreSonus.Midi.kNoteOff | 0xBF, 0x03, 0x01);
             // make sure DAW mode is OFF since this instance is Midi Only 
-            this.sendMidi(PreSonus.Midi.kNoteOff | 15, 0x0C, 0x00); // why is the PAD mode for Drum Layout called?
+            this.sendMidi(PreSonus.Midi.kNoteOff | 0xBF, 0x03, 0x01); // why is the PAD mode for Drum Layout called?
             this.hostDevice.invalidateAll();
         }
     }
@@ -198,6 +198,7 @@ class LaunchKeyMK3BasicDevice extends PreSonus.ControlSurfaceDevice {
         this.log("Exiting LaunchKey MK3 basic from LaunchKeyMK3MidiDevice_basic.js");
         // Do we need a clean up on Studio One shutdown to reset the DAW mode?
         //this.sendMidi(0xBF, 0x03, 0x01);
+        this.sendMidi(PreSonus.Midi.kNoteOff | 0xBF, 0x03, 0x01);
         super.onExit();
     }
 }

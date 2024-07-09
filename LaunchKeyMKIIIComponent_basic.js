@@ -56,20 +56,19 @@ class LaunchKeyMK3BasicComponent extends PreSonus.ControlSurfaceComponent {
      * @param {object} msg - The notification message.
      */
     notify(subject, msg) {
-        let msgName = msg.getArg(0).name; // Added variable for msg.getArg(0).name
-        let msgArg = msg.getArg(0).value; // Added variable for msg.getArg(0).value
+        //this.log("Component_basic.js notify function" + subject + ': ' + msg.id);
         if (msg.id == 'paramChanged') {
-            if (this[msgName])
-                this[msgName].setValue(msgArg, true);
-            else if (this.modes.params[msgName])
-                this.modes.params[msgName].setValue(msgArg, true);
+            if (this[msg.getArg(0).name])
+                this[msg.getArg(0).name].setValue(msg.getArg(0).value, true);
+            else if (this.modes.params[msg.getArg(0).name])
+                this.modes.params[msg.getArg(0).name].setValue(msg.getArg(0).value, true);
             else {
                 // Handle unknown parameter
-                this.log("Unknown parameter received " + subject + "msgName: " + this[msgName] + "msgArg: " + this[msgArg]);
+                this.log("Unknown paramater received" + subject + ': ' + msg.id);
             }
         } else {
             // Handle unknown notification
-            this.log("Unknown non-parameter change event received " + subject + "msgName: " + this[msgName] + "msgArg: " + this[msgArg]);
+            this.log("Unknown notification received" + subject + ': ' + msg.id);
         }
     }
 }

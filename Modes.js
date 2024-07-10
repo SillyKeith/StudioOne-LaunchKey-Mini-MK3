@@ -123,11 +123,13 @@ class PadMode {
         if (value.charAt(0) === '#') {
             value = Color.hexToInt(value);
         }
+        Host.console.write("PadMode(setColor) Setting pad color " + pad + " to " + value);
         return this.component.setPadColor(pad, value);
     }
 
     toggle(pad, value, color_off, color_on) {
         this.component.setPadState(pad, true);
+        Host.console.write("PadMode(toggle) Setting pad " + pad + " to " + value);
         return this.setColor(pad, value ? color_on : color_off);
     }
 
@@ -251,7 +253,7 @@ function Modes( hostComponent, bankCount )
     for(let i = 0; i < bankCount; i++)
     {
         let channel = new Channel();
-
+        Host.console.write("Adding channel " + i);
         channel.genericElement = root.getGenericMapping().getElement(0).find ("knob[" + i + "]");
         channel.channelElement = channelBankElement.getElement(i);
         channel.sendsBankElement = channel.channelElement.find("SendsBankElement");
@@ -623,6 +625,7 @@ function Modes( hostComponent, bankCount )
 
     this.activateDrumHandler = function()
     {
+        this.debugLog("Activating drum handler" + this.params.drum.value);
         this.drumElement.component.setActiveHandler(this.params.drum.value);
     }
 

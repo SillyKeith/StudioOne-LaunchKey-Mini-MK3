@@ -167,39 +167,20 @@ class LaunchKeyMK3ExtendedMidiDevice extends PreSonus.ControlSurfaceDevice {
         this.handlers = {};
         this.idleListeners = [];
     }
-    // Per the Launchky MK3 Programmer's Reference Manual (https://fael-downloads-prod.focusrite.com/customer/prod/downloads/launchkey_mk3_programmer_s_reference_guide_v1_en.pdf),
-    // the device must be set to InControl mode to enable the extended features. This is done by sending a MIDI message
-    //
-    //  The following MIDI events are used to set DAW mode:
-    //      • Channel 16, Note 0Ch (12): DAW mode enable/disable.
-    //      • Channel 16, Note 0Bh (11): Continuous control Touch event enable/disable.
-    //      • Channel 16, Note 0Ah (10): Continuous control Pot Pickup enable/disable.
-    // By default, upon entry to DAW mode, Continuous control Touch events are disabled, and Continuous control Pot Pickup is disabled.
-    //
-    // A Note On event enters DAW mode or enables the respective feature, while a Note Off event exits DAW mode or disables the respective feature.
-    // When the DAW or DAW-like software recognizes the Launchkey [MK3] and connects to it, it should first enter DAW mode (send 9Fh 0Ch 7Fh), and then, if necessary, enable the features needed.
-    //
-    // When the DAW or DAW-like software exits, it should exit from DAW mode on the Launchkey [MK3] (send 9Fh 0Ch 00h) to return it to Standalone (MIDI) mode.
-    //
-    // DAW mode on: send 9Fh 0Ch 7Fh
-    // DAW mode off: send 9Fh 0Ch 00h   -> returns to Midi Mode
-    //    
-    // bool will toggle on or off DAW mode based on current state of the device.
-    // ?? is this required for the LaunchKey MK3? 
+
     enableInControlMode(bool) {
-       this.sendMidi(0x9F, 0x0C, bool ? 0x7F : 0x00);
+        this.sendMidi(0x9F, 0x0C, bool ? 0x7F : 0x00);
     }
 
     onInit(hostDevice) {
         super.onInit(hostDevice);
-        this.debugLog = true;
     }
 
     createHandler(name, attributes) {
         const getAttr = (name) => {
             let attr = attributes.getAttribute(name);
             if (!attr) return null;
-            
+
             if (typeof attr === 'string') return parseInt(attr.replace('#', '0x'));
             return attr;
         };
@@ -243,52 +224,27 @@ class LaunchKeyMK3ExtendedMidiDevice extends PreSonus.ControlSurfaceDevice {
             this.idleListeners[i].onIdle(time);
         }
     }
-    
-    //** Called by host when MIDI output is connected or disconnected. *//
+
     onMidiOutConnected(state) {
         super.onMidiOutConnected(state);
 
         if (state) {
             this.log("Starting LaunchKey MK3 Extended");
             // Reset Pads
-            // This is required to diable the Launchkey's PAD mode by sending a Note Off message to 
-            // Pad modes
-            // Pad mode changes are reported or can be changed by the following MIDI event:
-            //      • Channel 16 (MIDI status: BFh, [decimal 191] ), Control Change 03h (3)
-            // The Pad modes are mapped to the following values:
-            //      • 00h (0): Custom Mode 0
-            //      • 01h (1): Drum layout
-            //      • 02h (2): Session layout
-            //      • 03h (3): Scale Chords
-            //      • 04h (4): User Chords
-            //      • 05h (5): Custom Mode 0
-            //      • 06h (6): Custom Mode 1
-            //      • 07h (7): Custom Mode 2
-            //      • 08h (8): Custom Mode 3
-            //      • 09h (9): Device Select
-            //      • 0Ah (10): Navigation
-            //
+            // This is required to reset the pads to their default state
             this.enableInControlMode(false);
             this.enableInControlMode(true);
             this.sendMidi(PreSonus.Midi.kNoteOff | 0xBF, 0x03, 0x01);
-            //this.sendMidi(PreSonus.Midi.kNoteOn | 15, 0x0C, 0x7F);  // DAW mode on, there's no need to set POT/PAD/DRUM mode too.
             this.hostDevice.invalidateAll();
-        } else {
-            this.log("Stopping LaunchKey MK3 Extended");
-            this.sendMidi(PreSonus.Midi.kNoteOff | 15, 0x0C, 0x00);
         }
     }
-    
-    //** Called by host when device is being destroyed. *//
+
     onExit() {
-        // Transmit native mode off message to reset back to Midi Mode
+        // Transmit native mode off message
         // This is required to return the device to its default state
-        // Documentation states that the following MIDI events are used to exit DAW mode: 9f 0C 00
         // Added "PreSonus.Midi.kNoteOff |" to the sendMidi call
         this.sendMidi(PreSonus.Midi.kNoteOff | 0xBF, 0x03, 0x01);
         this.enableInControlMode(false);
-        this.log("Exiting LaunchKey MK3 Extended from LaunchKeyMK3ExtendedMidiDevice.js");
-        //this.sendMidi(PreSonus.Midi.kNoteOff | 15, 0x0C, 0x00);  // DAW mode off
         super.onExit();
     }
 }

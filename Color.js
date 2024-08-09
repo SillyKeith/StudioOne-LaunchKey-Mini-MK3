@@ -87,6 +87,47 @@ Color.Values = {
      RED_DIMMED: 121,
      SKY_BLUE_DIMMED: 43
 };
+Color.ValuesHex = {
+    BLACK: 0x00,
+    DARK_GREY: 0x01,
+    GREY: 0x02,
+    WHITE: 0x03,
+    WHITE_HALF: 0x01,
+    RED: 0x05,
+    RED_HALF: 0x07,
+    OFF_WHITE: 0x08,
+    ORANGE: 0x09,
+    ORANGE_HALF: 0x0B,
+    CREAM: 0x0C,
+    AMBER: 0x60,
+    AMBER_HALF: 0x0E,
+    DARK_YELLOW: 0x11,
+    DARK_YELLOW_HALF: 0x13,
+    GREEN: 0x15,
+    GREEN_HALF: 0x1B,
+    MINT: 0x1D,
+    MINT_HALF: 0x1F,
+    LIGHT_BLUE: 0x25,
+    LIGHT_BLUE_HALF: 0x27,
+    SKY_BLUE: 0x28,
+    BLUE: 0x29,
+    BLUE_HALF: 0x2B,
+    DARK_BLUE: 0x31,
+    DARK_BLUE_HALF: 0x33,
+    VIOLET: 0x34,
+    PURPLE: 0x35,
+    PURPLE_HALF: 0x37,
+    AQUA: 0x4D,
+    DARK_ORANGE: 0x54,
+    PALE_GREEN: 0x57,
+    PALE_GREEN_HALF: 0x59,
+    YELLOW: 0x61,
+    YELLOW_HALF: 0x7D,
+    
+    YELLOW_DIMMED: 0x7D,
+    RED_DIMMED: 0x79,
+    SKY_BLUE_DIMMED: 0x2B
+};
 
 Color.RGB_COLOR_TABLE = [
     // BANK 1
@@ -430,4 +471,13 @@ function Color( _v ) {
     }
 
     this.midi = this.determineMidiValue(this.original_value);
+
+    this.equals = function(otherColor) {
+        if (!(otherColor instanceof Color)) {
+            return false;
+        }
+        return this.original_value === otherColor.original_value &&
+               JSON.stringify(this.converted_values) === JSON.stringify(otherColor.converted_values) &&
+               this.midi === otherColor.midi;
+    }
 }

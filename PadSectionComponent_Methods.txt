@@ -1,0 +1,334 @@
+    /**
+	* PadSectionComponent Methods
+    *
+    * ```
+	* ```
+
+
+	setPadRate(key, repeatRates)
+        let padRepeatRates = [
+            PreSonus.NoteRepeat.k4thPpq,
+            PreSonus.NoteRepeat.k8thPpq,
+            PreSonus.NoteRepeat.k16thPpq,
+            PreSonus.NoteRepeat.k32thPpq,
+            PreSonus.NoteRepeat.k4thTPpq,
+            PreSonus.NoteRepeat.k8thTPpq,
+            PreSonus.NoteRepeat.k16thTPpq,
+            PreSonus.NoteRepeat.k32thTPpq
+        ];	
+        for(let key in padRepeatRates)
+	*	padComponent.setPadRate(key, padRepeatRates[key]);
+	*
+	
+	handler
+	* Register a send control handler.
+    * @param handler  Control handler to add.
+    *
+    *    addHandler(handler) {
+    *        handler.device = this;
+    *        handler.handlerIndex = this.hostDevice.addHandler(handler.name, handler);
+    *    }
+    
+	addMenuHandler(items, role)
+	* padComponent.addMenuHandler(items, _bankMenuElement);
+    *                 case PadSectionMode.kBankMenuMode:
+                    {
+                        let items = [];
+                        for (let i = 0; i < kBankCount; i++)
+                            items.push({ "padIndex": i, "value": i, "color": bankColors[i] });
+                        c.addMenuHandler(items, this.bankMenu, 0);
+                        c.getHandler(mode).setPadColor(kDefaultBankColor);
+                    }
+
+	setPadColor(color) 
+	* Color can be hex "#002CFF" or string "blue"
+	*
+	* padComponent.getHandler(i).setPadColor(Color.References['default_bank']);
+
+
+	addCommandInputHandler(commands)
+	* padComponent.addCommandInputHandler(commands);
+	* PreSonus.PadSection.addCommand(commands, 8, "Transport", "Tap Tempo", PreSonus.PadSection.kCommandItemDirect, null, '#0000FF');
+
+	getCurrentBank() 
+	// Returns the current bank index.
+    * updateBankMenuColor = function() {
+    *    this.log("Updating bank menu color");
+    *    let c = this.padSessionSection.component;
+    *    let d = this.padDrumSection.component;
+    *    let bankIndex = c.getCurrentBank();
+
+	setCurrentBank(bankIndex)
+	// Set the current bank index of a component.
+	* this.padSessionSection.component.setCurrentBank(param.value);
+
+	isKeyboardMode()
+	* padSectionComponent.isKeyboardMode();
+
+	setKeyboardMode(state)
+	
+	*  let padSectionComponent = subject;
+    *  this.isKeyboardModeParam.setValue(padSectionComponent.isKeyboardMode(), true);
+
+	setFullVelocityMode(state)
+	* padSectionComponent.setFullVelocityMode(true);
+
+	suspendProcessing(index)
+	* this.userDefinedElement.component.suspendProcessing(mode.id != 'setup');
+
+	setModifierActive(state, modifier)
+	 * padSectionComponent.setModifierActive (true, PreSonus.PadModifier.kStepBinding);
+
+	isModifierActive()
+	// Returns true if the modifier is active.
+	* padSectionComponent.isModifierActive();
+
+	isPadColoringSupported()
+	// Returns true if pad coloring is supported.
+
+	setPadColoringSupported(state)
+	// Set pad coloring support (true or false).
+	*
+	* let padComponent = _padElement.component;
+    * padComponent.setPadColoringSupported(true);
+	*
+	addPadPaletteColor(color)
+	// Color can be hex "#002CFF" or string "blue"
+	*        c.setPadColoringSupported(true);
+    *    for (let i = 0; i < padSnapColors.length; i++)
+    *        c.addPadPaletteColor(padSnapColors[i]);
+    *    this.lastTrackEditorType = PreSonus.HostUtils.kEditorTypeNone;
+
+	setScale(scale)
+	// Set the musical scale. Must include MusicProtocol.js file
+	* padSectionComponent.setScale(PreSonus.MusicalScale.kMajor);
+
+	setRootOffset(offset)
+	// Set the root note offset.
+	        this.rootOffsetParam = paramList.addList("rootOffset");
+        let keys = [
+            "C", "C#", "D", "D#", "E", "F", "F#", "G", "G#", "A", "A#", "B"
+        ];
+        for (let keyIndex = 0; keyIndex < keys.length; keyIndex++)
+            this.rootOffsetParam.appendString(keys[keyIndex]);
+		
+		this.updateRootOffset(param.value);
+		
+    updateRootOffset(offset) {
+        this.padSection.component.setRootOffset(offset);
+    }
+
+	setKeyboardModeLayout(layout)
+	// Set the keyboard mode layout.
+	var PadLayoutID;
+	(function (PadLayoutID) {
+		PadLayoutID[PadLayoutID["kKeyboard"] = 0] = "kKeyboard";
+		PadLayoutID[PadLayoutID["kPadContinuous"] = 1] = "kPadContinuous";
+		PadLayoutID[PadLayoutID["kPadScaleOnly"] = 2] = "kPadScaleOnly";
+		PadLayoutID[PadLayoutID["kLayoutCount"] = 3] = "kLayoutCount";
+	})(PadLayoutID || (PadLayoutID = {}));
+	pse.component.setKeyboardModeLayout(PadLayoutID.kKeyboard);
+	// example case statement to set the layout from ATOMSQComponent.js
+	case PadConfiguration.kLayout:
+	c.setKeyboardModeLayout(value);
+	break;
+
+	setPadOffset(offset)
+	setCurrentOctave(octave)
+	getCurrentOctave()
+	// Example case statement to set the range from ATOMSQComponent.js
+	// configureMusicInputPads(modification, value) {
+        let musicInputElements = [PadSectionID.kMain, PadSectionID.kDualMusic];
+        for (let i = 0; i < musicInputElements.length; i++) {
+            let elementName = musicInputElements[i];
+            let c = this.getPadSectionElement(elementName).component;
+            switch (modification) {
+                case PadConfiguration.kScale:
+                    c.setScale(value);
+                    break;
+                case PadConfiguration.kOctave:
+                    c.setCurrentOctave(value);
+                    break;
+                case PadConfiguration.kRootOffset:
+                    c.setRootOffset(value);
+                    break;
+                case PadConfiguration.kRange:
+                    c.setPadOffset(value);
+                    break;
+                case PadConfiguration.kAccentColor:
+                    c.setAccentColor(value);
+                    break;
+                case PadConfiguration.kLayout:
+                    c.setKeyboardModeLayout(value);
+                    break;
+                case PadConfiguration.kFullVelocity:
+                    c.setFullVelocityMode(value);
+                    break;
+                case PadConfiguration.kPadFocus:
+                    {
+                        let handlerIndex = this.getHandlerIndexByName(elementName, PreSonus.PadSectionRole.kMusicInput);
+                        let musicInputHandler = c.getHandler(handlerIndex);
+                        musicInputHandler.setFocusPadWhenPressed(value);
+                    }
+                    break;
+                default:
+                    break;
+            }
+        }
+
+	setAccentColor(color)
+	// Set the accent color.
+	// Color can be hex "#002CFF" or string "blue"
+	* padSectionComponent.setAccentColor(Color.References['default_bank']);
+
+	clearPadPressedState()
+	// Clear the pad pressed state.
+	* padSectionComponent.clearPadPressedState();
+	
+
+
+
+Component Prototype Methods for component:
+getPadCountsetPadState
+setPadColor
+setPadRate
+addHandler
+addHandlerForRole
+addMenuHandler
+addCommandInputHandler
+addNullHandler
+getHandler
+setActiveHandler
+getCurrentBank
+setCurrentBank
+isKeyboardMode
+setKeyboardMode
+setFullVelocityMode
+suspendProcessing
+setModifierActive
+isModifierActive
+isPadColoringSupported
+setPadColoringSupported
+addPadPaletteColor
+setScale
+setRootOffset
+setKeyboardModeLayout
+setPadOffset
+setCurrentOctave
+getCurrentOctave
+setAccentColor
+clearPadPressedState
+
+ControlSurfaceComponent.js 
+    /**
+     * Handler roles supported by PadSectionComponent.
+     *
+     * ```
+     * padSectionComponent.addHandlerForRole (PreSonus.PadSectionRole.kMusicInput);
+     * ```
+     */
+    let PadSectionRole;
+    (function (PadSectionRole) {
+        /** Musical input. */
+        PadSectionRole["kMusicInput"] = "musicinput";
+        /** Step editing, sequencing. */
+        PadSectionRole["kStepEdit"] = "stepedit";
+        /* Step editing, step parameters. */
+        PadSectionRole["kStepFocus"] = "stepfocus";
+        /** Trigger note repeat rates. */
+        PadSectionRole["kRateTrigger"] = "ratetrigger";
+        /** Bypass or disable pad input. */
+        PadSectionRole["kIdle"] = "idle";
+    })(PadSectionRole = PreSonus.PadSectionRole || (PreSonus.PadSectionRole = {}));
+    /**
+     * Step editor supported pad modifiers.
+     *
+     * ```
+     * padSectionComponent.setModifierActive (true, PreSonus.PadModifier.kStepBinding);
+     * ```
+     */
+    let PadModifier;
+    (function (PadModifier) {
+        /** Set step to accented. */
+        PadModifier[PadModifier["kAccentedStep"] = 0] = "kAccentedStep";
+        /** Use step binding to concatenate multiple steps. */
+        PadModifier[PadModifier["kStepBinding"] = 1] = "kStepBinding";
+    })(PadModifier = PreSonus.PadModifier || (PreSonus.PadModifier = {}));
+    //************************************************************************************************
+    // PadSection
+    //************************************************************************************************
+    class PadSection {
+        /** Add command to 'commands'. */
+        static addCommand(commands, padIndex, category, name, args, flags, zone, color) {
+            commands.push({ "padIndex": padIndex, "category": category, "name": name, "args": args, "flags": flags, "zone": zone, "color": color });
+        }
+    }
+    PadSection.kMenuUseListAccess = "listaccess";
+    PadSection.kMenuUseMusicInput = "musicinput";
+    PadSection.kCommandItemDirect = "direct";
+    PadSection.kCommandItemUserAssignable = "userassignable";
+    /** Notification: current bank changed. */
+    PadSection.kCurrentBankChanged = "currentBankChanged";
+    /** Notification: keyboard mode changed. */
+    PadSection.kKeyboardModeChanged = "keyboardModeChanged";
+    PreSonus.PadSection = PadSection;
+    /**
+     * Pad section music input pad handler display mode.
+     *
+     * ```
+     * let musicInputHandler = <PreSonus.PadSectionMusicInputHandler> component.getHandler (mode);
+     * musicInputHandler.setDisplayMode (PreSonus.MusicPadDisplayMode.kBrightColors);
+     * ```
+     */
+    let MusicPadDisplayMode;
+    (function (MusicPadDisplayMode) {
+        MusicPadDisplayMode["kBrightColors"] = "brightcolors";
+        MusicPadDisplayMode["kDimmedColors"] = "dimmedcolors";
+        MusicPadDisplayMode["kNoColors"] = "nocolors";
+    })(MusicPadDisplayMode = PreSonus.MusicPadDisplayMode || (PreSonus.MusicPadDisplayMode = {}));
+
+
+
+MusicProtocol.js 
+PreSonus.Music = Music;
+    /**
+     * Musical scales supported by PadSectionComponent.
+     *
+     * ```
+     * padSection.component.setScale (PreSonus.MusicalScale.kMajor);
+     * ```
+
+    let MusicalScale;
+    (function (MusicalScale) {
+        /** Chromatic */
+        MusicalScale[MusicalScale["kChromatic"] = 0] = "kChromatic";
+        /** Major */
+        MusicalScale[MusicalScale["kMajor"] = 1] = "kMajor";
+        /** Melodic Minor */
+        MusicalScale[MusicalScale["kMelodicMinor"] = 2] = "kMelodicMinor";
+        /** Harmonic Minor */
+        MusicalScale[MusicalScale["kHarmonicMinor"] = 3] = "kHarmonicMinor";
+        /** Natural Minor */
+        MusicalScale[MusicalScale["kNaturalMinor"] = 4] = "kNaturalMinor";
+        /** Major Pentatonic */
+        MusicalScale[MusicalScale["kMajorPentatonic"] = 5] = "kMajorPentatonic";
+        /** Minor Pentatonic */
+        MusicalScale[MusicalScale["kMinorPentatonic"] = 6] = "kMinorPentatonic";
+        /** Blues */
+        MusicalScale[MusicalScale["kBlues"] = 7] = "kBlues";
+        /** Dorian */
+        MusicalScale[MusicalScale["kDorian"] = 8] = "kDorian";
+        /** Mixolydian */
+        MusicalScale[MusicalScale["kMixolydian"] = 9] = "kMixolydian";
+        /** Phyrigian */
+        MusicalScale[MusicalScale["kPhrygian"] = 10] = "kPhrygian";
+        /** Major Triad */
+        MusicalScale[MusicalScale["kMajorTriad"] = 11] = "kMajorTriad";
+        /** Minor Triad */
+        MusicalScale[MusicalScale["kMinorTriad"] = 12] = "kMinorTriad";
+        /** Max scale index */
+        MusicalScale[MusicalScale["kMaxScale"] = 12] = "kMaxScale";
+        /** Default scale */
+        MusicalScale[MusicalScale["kDefault"] = 0] = "kDefault";
+  //  })(MusicalScale = PreSonus.MusicalScale || (PreSonus.MusicalScale = {}));
+//})(PreSonus || (PreSonus = {}));

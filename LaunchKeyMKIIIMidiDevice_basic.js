@@ -9,9 +9,11 @@
  */
 
 // include SDK files from host
-include_file("./resources/midiprotocol.js");
-include_file("./resources/controlsurfacedevice.js");
-include_file("Debug.js");
+//include_file("./resources/midiprotocol.js");
+//include_file("./resources/controlsurfacedevice.js");
+//include_file("Debug.js");
+include_file("resource://com.presonus.musicdevices/sdk/controlsurfacedevice.js");
+include_file("resource://com.presonus.musicdevices/sdk/midiprotocol.js");
 
 class TouchModHandler extends PreSonus.ControlHandler {
     constructor(name, channel) {
@@ -152,16 +154,19 @@ class LaunchKeyMK3BasicDevice extends PreSonus.ControlSurfaceDevice {
         let className = attributes.getAttribute("class");
         let handler = null;
         let ch = parseInt(attributes.getAttribute("channel"));
-
+        this.log(`Entered createHandler: name: ${name} className: ${className} parseInt: ${ch}`);
         switch (className) {
             case "TouchModHandler":
                 handler = new TouchModHandler(name, ch);
+                this.log(`Created TouchModHandler: handler.name: ${handler.name}`);
                 break;
             case "TouchPitchHandler":
                 handler = new TouchPitchHandler(name, ch);
+                this.log(`Created TouchPitchHandler: handler.name: ${handler.name}`);
                 break;
             case "TouchDoubleTapHandler":
                 handler = new TouchDoubleTapHandler(name, ch);
+                this.log(`Created TouchDoubleTapHandler: handler.name: ${handler.name}`);
                 this.idleListeners.push(handler);
                 break;
         }

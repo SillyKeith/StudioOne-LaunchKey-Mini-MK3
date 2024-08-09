@@ -1,0 +1,677 @@
+		
+		<!-- Start by defining each pad with a Control and MidiMessage -->
+		<!-- Control contains a Control[name] [type], [option] value  -->
+		<!-- It is used to tell us the type of MIDI message "trigger" -->
+		<!-- The Control contains the MIDI message is "received" from the device. -->
+		<!-- The MIDI message status will be a "NoteTrigger" aka MidoNoteOn/MidiNoteOff -->
+		<!-- The MIDI message address is 0x24 -->
+		<!-- The MIDI message options are "through" -->		
+		
+		<!-- PAD Controls -->
+		<!-- Default is Session layout.  We define Drum layout as a variant later -->
+		<!-- These are the MIDI CC controls for when in Session mode / Drummode -->
+		<!-- Pad mode changes are reported or can be changed by the following MIDI event:
+ 			• Channel 16 (MIDI status: BFh, 191), Control Change 03h (3)
+			 	The Pad modes are mapped to the following values:
+					• 00h (0): Custom Mode 0    ***NOTE this is same as (05h) Custom Mode 0
+ 					• 01h (1): Drum layout
+					• 02h (2): Session layout
+					• 03h (3): Scale Chords
+					• 04h (4): User Chords
+					• 05h (5): Custom Mode 0
+					• 06h (6): Custom Mode 1
+					• 07h (7): Custom Mode 2
+					• 08h (8): Custom Mode 3
+					• 09h (9): Device Select
+					• 0Ah (10): Navigation -->
+					
+        <!-- Row 1 DRUM LAYOUT ONLY 
+			This handler will get associated with padLED[i] in the scripts 
+        <Control name="pad[0]" type="trigger" options="receive">
+			<MidiMessage status="NoteTrigger" address="#28" options="through" /> 
+		</Control>
+        <Control name="padLED[0]" type="rgb" options="transmit fastupdate">
+			<Handler class="ColorLEDHandler" status="#9A" address="#28" />
+		</Control>
+        <Control name="padChannel[0]" options="transmit fastupdate"> 
+			<Handler class="ColorChannelHandler" channel="10"/> 
+		</Control>
+		<Control name="padEffect[0]" options="transmit fastupdate">
+			<Handler class="ColorEffectHandler" /> 
+		</Control>
+        <Control name="padState[0]" options="transmit fastupdate">
+			<Handler class="ColorStateHandler" /> 
+		</Control>
+
+		<Control name="pad[1]" type="trigger" options="receive">
+			<MidiMessage status="NoteTrigger" address="#29" options="through" />
+		</Control>
+        <Control name="padLED[1]" type="rgb" options="transmit fastupdate"> 
+			<Handler class="ColorLEDHandler" status="#9A" address="#29" />
+		</Control>
+        <Control name="padChannel[1]" options="transmit fastupdate"> 
+			<Handler class="ColorChannelHandler" channel="10"/>
+		</Control>
+        <Control name="padEffect[1]" options="transmit fastupdate"> 
+			<Handler class="ColorEffectHandler" />
+		</Control>
+		<Control name="padState[1]" options="transmit fastupdate"> 
+			<Handler class="ColorStateHandler" />
+		</Control>
+
+        <Control name="pad[2]" type="trigger" options="receive"> 
+			<MidiMessage status="NoteTrigger" address="#2A" options="through" />
+		</Control>
+        <Control name="padLED[2]" type="rgb" options="transmit fastupdate"> 
+			<Handler class="ColorLEDHandler" status="#9A" address="#2A" />
+		</Control>
+        <Control name="padChannel[2]" options="transmit fastupdate"> 
+			<Handler class="ColorChannelHandler" channel="10"/>
+		</Control>
+        <Control name="padEffect[2]" options="transmit fastupdate"> 
+			<Handler class="ColorEffectHandler" />
+		</Control>
+		 <Control name="padState[2]" options="transmit fastupdate"> 
+			<Handler class="ColorStateHandler" />
+		</Control>
+
+        <Control name="pad[3]" type="trigger" options="receive"> 
+			<MidiMessage status="NoteTrigger" address="#2B" options="through" />
+		</Control>
+        <Control name="padLED[3]" type="rgb" options="transmit fastupdate"> 
+			<Handler class="ColorLEDHandler" status="#9A" address="#2B" />
+		</Control>
+        <Control name="padChannel[3]" options="transmit fastupdate"> 
+			<Handler class="ColorChannelHandler" channel="10"/>
+		</Control>
+        <Control name="padEffect[3]" options="transmit fastupdate"> 
+			<Handler class="ColorEffectHandler" />
+		</Control>
+		<Control name="padState[3]" options="transmit fastupdate"> 
+			<Handler class="ColorStateHandler" />
+		</Control>
+
+        <Control name="pad[4]" type="trigger" options="receive">
+			<MidiMessage status="NoteTrigger" address="#30" options="through" />
+		</Control>
+        <Control name="padLED[4]" type="rgb" options="transmit fastupdate">
+			<Handler class="ColorLEDHandler" status="#9A" address="#30" />
+		</Control>
+        <Control name="padChannel[4]" options="transmit fastupdate">
+			<Handler class="ColorChannelHandler" channel="10"/>
+		</Control>
+        <Control name="padEffect[4]" options="transmit fastupdate">
+			<Handler class="ColorEffectHandler" />
+		</Control>
+		<Control name="padState[4]" options="transmit fastupdate">
+			<Handler class="ColorStateHandler" />
+		</Control>
+
+        <Control name="pad[5]" type="trigger" options="receive">
+			<MidiMessage status="NoteTrigger" address="#31" options="through" />
+		</Control>
+        <Control name="padLED[5]" type="rgb" options="transmit fastupdate">
+			<Handler class="ColorLEDHandler" status="#9A" address="#31" />
+		</Control>
+        <Control name="padChannel[5]" options="transmit fastupdate">
+			<Handler class="ColorChannelHandler" channel="10"/>
+		</Control>
+        <Control name="padEffect[5]" options="transmit fastupdate">
+			<Handler class="ColorEffectHandler" />
+		</Control>
+		<Control name="padState[5]" options="transmit fastupdate">
+			<Handler class="ColorStateHandler" />
+		</Control>
+
+        <Control name="pad[6]" type="trigger" options="receive">
+			<MidiMessage status="NoteTrigger" address="#32" options="through" />
+		</Control>
+        <Control name="padLED[6]" type="rgb" options="transmit fastupdate">
+			<Handler class="ColorLEDHandler" status="#9A" address="#32" />
+		</Control>
+        <Control name="padChannel[6]" options="transmit fastupdate">
+			<Handler class="ColorChannelHandler" channel="10"/>
+		</Control>
+        <Control name="padEffect[6]" options="transmit fastupdate">
+			<Handler class="ColorEffectHandler" />
+		</Control>
+		<Control name="padState[6]" options="transmit fastupdate">
+			<Handler class="ColorStateHandler" />
+		</Control>
+
+        <Control name="pad[7]" type="trigger" options="receive">
+			<MidiMessage status="NoteTrigger" address="#33" options="through" />
+		</Control>
+        <Control name="padLED[7]" type="rgb" options="transmit fastupdate">
+			<Handler class="ColorLEDHandler" status="#9A" address="#33" />
+		</Control>
+        <Control name="padChannel[7]" options="transmit fastupdate">
+			<Handler class="ColorChannelHandler" channel="10"/>
+		</Control>
+        <Control name="padEffect[7]" options="transmit fastupdate">
+			<Handler class="ColorEffectHandler" />
+		</Control>
+		<Control name="padState[7]" options="transmit fastupdate">
+			<Handler class="ColorStateHandler" />
+		</Control>
+
+         Row 2
+        <Control name="pad[8]" type="trigger" options="receive">
+			<MidiMessage status="NoteTrigger" address="#24" options="through"/>
+		</Control>
+        <Control name="padLED[8]" type="rgb" options="transmit fastupdate">
+			<Handler class="ColorLEDHandler" status="#9A" address="#24" />
+		</Control>
+        <Control name="padChannel[8]" options="transmit fastupdate">
+			<Handler class="ColorChannelHandler" channel="10"/>
+		</Control>
+        <Control name="padEffect[8]" options="transmit fastupdate">
+			<Handler class="ColorEffectHandler" />
+		</Control>
+		<Control name="padState[8]" options="transmit fastupdate">
+			<Handler class="ColorStateHandler" />
+		</Control>
+
+        <Control name="pad[9]" type="trigger" options="receive">
+			<MidiMessage status="NoteTrigger" address="#25" options="through"/>
+		</Control>
+        <Control name="padLED[9]" type="rgb" options="transmit fastupdate">
+			<Handler class="ColorLEDHandler" status="#9A" address="#25" />
+		</Control>
+        <Control name="padChannel[9]" options="transmit fastupdate">
+			<Handler class="ColorChannelHandler" channel="10"/>
+		</Control>
+        <Control name="padEffect[9]" options="transmit fastupdate">
+			<Handler class="ColorEffectHandler" />
+		</Control>
+		<Control name="padState[9]" options="transmit fastupdate">
+			<Handler class="ColorStateHandler" />
+		</Control>
+
+        <Control name="pad[10]" type="trigger" options="receive">
+			<MidiMessage status="NoteTrigger" address="#26" options="through"/>
+		</Control>
+        <Control name="padLED[10]" type="rgb" options="transmit fastupdate">
+			<Handler class="ColorLEDHandler" status="#9A" address="#26" />
+		</Control>
+        <Control name="padChannel[10]" options="transmit fastupdate">
+			<Handler class="ColorChannelHandler" channel="10"/>
+		</Control>
+        <Control name="padEffect[10]" options="transmit fastupdate">
+			<Handler class="ColorEffectHandler" />
+		</Control>
+		<Control name="padState[10]" options="transmit fastupdate">
+			<Handler class="ColorStateHandler" />
+		</Control>
+
+        <Control name="pad[11]" type="trigger" options="receive">
+			<MidiMessage status="NoteTrigger" address="#27" options="through"/>
+		</Control>
+        <Control name="padLED[11]" type="rgb" options="transmit fastupdate">
+			<Handler class="ColorLEDHandler" status="#9A" address="#27" />
+		</Control>
+        <Control name="padChannel[11]" options="transmit fastupdate">
+			<Handler class="ColorChannelHandler" channel="10"/>
+		</Control>
+        <Control name="padEffect[11]" options="transmit fastupdate">
+			<Handler class="ColorEffectHandler" />
+		</Control>
+		<Control name="padState[11]" options="transmit fastupdate">
+			<Handler class="ColorStateHandler" />
+		</Control>
+
+        <Control name="pad[12]" type="trigger" options="receive">
+			<MidiMessage status="NoteTrigger" address="#2C" options="through"/>
+		</Control>
+        <Control name="padLED[12]" type="rgb" options="transmit fastupdate">
+			<Handler class="ColorLEDHandler" status="#9A" address="#2C" />
+		</Control>
+        <Control name="padChannel[12]" options="transmit fastupdate">
+			<Handler class="ColorChannelHandler" channel="10"/>
+		</Control>
+        <Control name="padEffect[12]" options="transmit fastupdate">
+			<Handler class="ColorEffectHandler" />
+		</Control>
+		<Control name="padState[12]" options="transmit fastupdate">
+			<Handler class="ColorStateHandler" />
+		</Control>
+
+        <Control name="pad[13]" type="trigger" options="receive">
+			<MidiMessage status="NoteTrigger" address="#2D" options="through"/>
+		</Control>
+        <Control name="padLED[13]" type="rgb" options="transmit fastupdate">
+			<Handler class="ColorLEDHandler" status="#9A" address="#2D" />
+		</Control>
+        <Control name="padChannel[13]" options="transmit fastupdate">
+			<Handler class="ColorChannelHandler" channel="10"/>
+		</Control>
+        <Control name="padEffect[13]" options="transmit fastupdate">
+			<Handler class="ColorEffectHandler" />
+		</Control>
+		<Control name="padState[13]" options="transmit fastupdate">
+			<Handler class="ColorStateHandler" />
+		</Control>
+
+        <Control name="pad[14]" type="trigger" options="receive">
+			<MidiMessage status="NoteTrigger" address="#2E" options="through"/>
+		</Control>
+        <Control name="padLED[14]" type="rgb" options="transmit fastupdate">
+			<Handler class="ColorLEDHandler" status="#9A" address="#2E" />
+		</Control>
+        <Control name="padChannel[14]" options="transmit fastupdate">
+			<Handler class="ColorChannelHandler" channel="10"/>
+		</Control>
+        <Control name="padEffect[14]" options="transmit fastupdate">
+			<Handler class="ColorEffectHandler" />
+		</Control>
+		<Control name="padState[14]" options="transmit fastupdate">
+			<Handler class="ColorStateHandler" />
+		</Control>
+
+        <Control name="pad[15]" type="trigger" options="receive">
+			<MidiMessage status="NoteTrigger" address="#2F" options="through"/>
+		</Control>
+        <Control name="padLED[15]" type="rgb" options="transmit fastupdate">
+			<Handler class="ColorLEDHandler" status="#9A" address="#2F" />
+		</Control>
+        <Control name="padChannel[15]" options="transmit fastupdate">
+			<Handler class="ColorChannelHandler" channel="10"/>
+		</Control>
+        <Control name="padEffect[15]" options="transmit fastupdate">
+			<Handler class="ColorEffectHandler" />
+		</Control>
+		<Control name="padState[15]" options="transmit fastupdate">
+			<Handler class="ColorStateHandler" />
+		</Control>
+		-->
+
+<?xml version="1.0" encoding="UTF-8"?>
+<ControlSurface>
+	<Controls>
+        <Control name="pad[0]" type="trigger" options="receive public">
+			<MidiMessage status="NoteTrigger" address="#28" options="through" /> 
+		</Control>
+        <Control name="padLED[0]" options="transmit fastupdate">
+			<MidiMessage status="#9A" address="#28" />
+		</Control>
+		<Control name="padLEDColor[0]" type="rgb" options="transmit fastupdate">
+			<Handler class="ColorLEDHandler" status="#9A"/>
+		</Control>
+		<Control name="pad[1]" type="trigger" options="receive">
+			<MidiMessage status="NoteTrigger" address="#29" options="through" /> 
+		</Control>
+		<Control name="padLED[1]" options="transmit fastupdate">
+			<MidiMessage status="#9A" address="#29" />
+		</Control>
+		<Control name="padLEDColor[1]" type="rgb" options="transmit fastupdate">
+			<Handler class="ColorLEDHandler" status="#9A"/>
+		</Control>
+		<Control name="pad[2]" type="trigger" options="receive">
+			<MidiMessage status="NoteTrigger" address="#2A" options="through" /> 
+		</Control>
+		<Control name="padLED[2]" options="transmit fastupdate">
+			<MidiMessage status="#9A" address="#2A" />
+		</Control>
+		<Control name="padLEDColor[2]" type="rgb" options="transmit fastupdate">
+			<Handler class="ColorLEDHandler" status="#9A"/>
+		</Control>
+		<Control name="pad[3]" type="trigger" options="receive">
+			<MidiMessage status="NoteTrigger" address="#2B" options="through" /> 
+		</Control>
+		<Control name="padLED[3]" options="transmit fastupdate">
+			<MidiMessage status="#9A" address="#2B" />
+		</Control>
+		<Control name="padLEDColor[3]" type="rgb" options="transmit fastupdate">
+			<Handler class="ColorLEDHandler" status="#9A"/>
+		</Control>
+		<Control name="pad[4]" type="trigger" options="receive">
+			<MidiMessage status="NoteTrigger" address="#30" options="through" /> 
+		</Control>
+		<Control name="padLED[4]" options="transmit fastupdate">
+			<MidiMessage status="#9A" address="#30" />
+		</Control>
+		<Control name="padLEDColor[4]" type="rgb" options="transmit fastupdate">
+			<Handler class="ColorLEDHandler" status="#9A"/>
+		</Control>
+		<Control name="pad[5]" type="trigger" options="receive">
+			<MidiMessage status="NoteTrigger" address="#31" options="through" /> 
+		</Control>
+		<Control name="padLED[5]" options="transmit fastupdate">
+			<MidiMessage status="#9A" address="#31" />
+		</Control>
+		<Control name="padLEDColor[5]" type="rgb" options="transmit fastupdate">
+			<Handler class="ColorLEDHandler" status="#9A"/>
+		</Control>
+		<Control name="pad[6]" type="trigger" options="receive">
+			<MidiMessage status="NoteTrigger" address="#32" options="through" /> 
+		</Control>
+		<Control name="padLED[6]" options="transmit fastupdate">
+			<MidiMessage status="#9A" address="#32" />
+		</Control>
+		<Control name="padLEDColor[6]" type="rgb" options="transmit fastupdate">
+			<Handler class="ColorLEDHandler" status="#9A"/>
+		</Control>
+		<Control name="pad[7]" type="trigger" options="receive">
+			<MidiMessage status="NoteTrigger" address="#33" options="through" /> 
+		</Control>
+		<Control name="padLED[7]" options="transmit fastupdate">
+			<MidiMessage status="#9A" address="#33" />
+		</Control>
+		<Control name="padLEDColor[7]" type="rgb" options="transmit fastupdate">
+			<Handler class="ColorLEDHandler" status="#9A"/>
+		</Control>
+		<Control name="pad[8]" type="trigger" options="receive">
+			<MidiMessage status="NoteTrigger" address="#24" options="through" /> 
+		</Control>
+		<Control name="padLED[8]" options="transmit fastupdate">
+			<MidiMessage status="#9A" address="#24" />
+		</Control>
+		<Control name="padLEDColor[8]" type="rgb" options="transmit fastupdate">
+			<Handler class="ColorLEDHandler" status="#9A"/>
+		</Control>
+
+		<Control name="pad[9]" type="trigger" options="receive">
+			<MidiMessage status="NoteTrigger" address="#25" options="through" /> 
+		</Control>
+		<Control name="padLED[9]" options="transmit fastupdate">
+			<MidiMessage status="#9A" address="#25" />
+		</Control>
+		<Control name="padLEDColor[9]" type="rgb" options="transmit fastupdate">
+			<Handler class="ColorLEDHandler" status="#9A"/>
+		</Control>
+
+		<Control name="pad[10]" type="trigger" options="receive">
+			<MidiMessage status="NoteTrigger" address="#26" options="through" /> 
+		</Control>
+		<Control name="padLED[10]" options="transmit fastupdate">
+			<MidiMessage status="#9A" address="#26" />
+		</Control>
+		<Control name="padLEDColor[10]" type="rgb" options="transmit fastupdate">
+			<Handler class="ColorLEDHandler" status="#9A"/>
+		</Control>
+
+		<Control name="pad[11]" type="trigger" options="receive">
+			<MidiMessage status="NoteTrigger" address="#27" options="through" /> 
+		</Control>
+		<Control name="padLED[11]" options="transmit fastupdate">
+			<MidiMessage status="#9A" address="#27" />
+		</Control>
+		<Control name="padLEDColor[11]" type="rgb" options="transmit fastupdate">
+			<Handler class="ColorLEDHandler" status="#9A"/>
+		</Control>
+
+		<Control name="pad[12]" type="trigger" options="receive">
+			<MidiMessage status="NoteTrigger" address="#2C" options="through" /> 
+		</Control>
+		<Control name="padLED[12]" options="transmit fastupdate">
+			<MidiMessage status="#9A" address="#2C" />
+		</Control>
+		<Control name="padLEDColor[12]" type="rgb" options="transmit fastupdate">
+			<Handler class="ColorLEDHandler" status="#9A"/>
+		</Control>
+
+		<Control name="pad[13]" type="trigger" options="receive">
+			<MidiMessage status="NoteTrigger" address="#2D" options="through" /> 
+		</Control>
+		<Control name="padLED[13]" options="transmit fastupdate">
+			<MidiMessage status="#9A" address="#2D" />
+		</Control>
+		<Control name="padLEDColor[13]" type="rgb" options="transmit fastupdate">
+			<Handler class="ColorLEDHandler" status="#9A"/>
+		</Control>
+
+		<Control name="pad[14]" type="trigger" options="receive">
+			<MidiMessage status="NoteTrigger" address="#2E" options="through" /> 
+		</Control>
+		<Control name="padLED[14]" options="transmit fastupdate">
+			<MidiMessage status="#9A" address="#2E" />
+		</Control>
+		<Control name="padLEDColor[14]" type="rgb" options="transmit fastupdate">
+			<Handler class="ColorLEDHandler" status="#9A"/>
+		</Control>
+
+		<Control name="pad[15]" type="trigger" options="receive">
+			<MidiMessage status="NoteTrigger" address="#2F" options="through" /> 
+		</Control>
+		<Control name="padLED[15]" options="transmit fastupdate">
+			<MidiMessage status="#9A" address="#2F" />
+		</Control>
+		<Control name="padLEDColor[15]" type="rgb" options="transmit fastupdate">
+			<Handler class="ColorLEDHandler" status="#9A"/>
+		</Control>
+
+	    <Control name="devicePadMode" title="Device Pad Mode" options="transmit receive">
+            <MidiMessage status="#BF" address="#03" />  <!-- Channel=15 is redunant with #BF-->
+        </Control>
+
+		<!-- I'm not sure about what this is for -->
+		<Control name="f_chord" title="Fixed Chord" options="receive public" type="trigger">
+            <MidiMessage status="Controller" address="102" />
+        </Control>
+        <Control name="f_chordLED" options="transmit">
+            <Handler class="MonoLEDHandler" address="102" />
+        </Control>
+
+		<Control name="shift" title="Shift" options="receive" type="button">
+            <MidiMessage status="Controller" address="#6C" />
+        </Control>
+		
+		<Control name="ssm" title="Stop Solo Mute" options="receive" type="trigger">
+            <MidiMessage status="Controller" address="#69" />
+        </Control>
+
+        <Control name="arp" title="ARP" options="receive public" type="trigger">
+            <MidiMessage status="Controller" address="#67" />
+        </Control>
+        <Control name="arpLED" options="transmit">
+            <Handler class="MonoLEDHandler" address="#67" />
+        </Control>
+        
+		<Control name="play" options="receive" type="button">
+            <MidiMessage status="Controller" address="#73" />
+        </Control>
+        <Control name="playLED" options="transmit">
+             <Handler class="MonoLEDHandler" address="#73" />
+        </Control>
+        <Control name="record" options="receive" type="button">
+            <MidiMessage status="Controller" address="#75" />
+        </Control>
+        <Control name="recordLED" options="transmit">
+            <Handler class="MonoLEDHandler" address="#75" />
+        </Control>
+	</Controls> 
+	
+
+	<!-- ******************************************************************************************** -->
+	<!-- SURFACE MAPPINGS -->
+	<!-- ******************************************************************************************** -->
+
+	<Mappings>
+		<!-- The Pad modes are mapped to the following values and there will be an ENUM in the script: -->
+		<!-- only the first 3 are used in the script, Custom_Mode 0 is really 5
+				• 00h (0): Custom Mode 0
+				• 01h (1): Drum layout
+				• 02h (2): Session layout
+				• 03h (3): Scale Chords
+				• 04h (4): User Chords
+				• 05h (5): Custom Mode 0
+				• 06h (6): Custom Mode 1
+				• 07h (7): Custom Mode 2
+				• 08h (8): Custom Mode 3
+				• 09h (9): Device Select
+				• 0Ah (10): Navigation  -->
+		
+       	<!-- definitions to use symbolic names (must be kept in sync with script!) -->
+		<!-- Device pad layouts -->
+  	    <define name="$DEVICE_PAD_CUSTOM" value="0"/>
+		<define name="$DEVICE_PAD_DRUM_LAYOUT" value="1" />
+		<define name="$DEVICE_PAD_SESSION_LAYOUT" value="2" />
+	    <define name="$DEVICE_PAD_SCALE_CHORDS" value="3"/>
+		<define name="$DEVICE_PAD_USER_CHORDS" value="4"/>
+		<define name="$DEVICE_PAD_CUSTOM_MODE0" value="5" />
+
+		<define name="$PLAY_MODE" value="0"/>
+		<define name="$SETUP_MODE" value="1"/>
+		<define name="$LOOP_EDIT_MODE" value="2"/>
+		<define name="$EVENT_EDIT_MODE" value="3"/>
+		<define name="$INSTRUMENT_EDIT_MODE" value="4"/>
+		<define name="$BANK_MENU_MODE" value="5"/>
+		<define name="$REPEAT_MENU_MODE" value="6"/>
+		<define name="$PITCH_MENU_MODE" value="7"/>
+		<define name="$RATE_TRIGGER_MODE" value="8"/>
+		<define name="$STEP_EDIT_MODE" value="9"/>
+		<define name="$RESTORE_PLAY_MODE" value="10"/>
+		 <!-- Extra to control a reset -->
+		<!-- <define name="$SCALE_CHORDS" value="3"/> -->
+		<!-- <define name="$USER_CHORDS" value="4"/> -->
+		<!-- <define name="$CUSTOM_MODE_0" value="5"/> -->
+		<!-- <define name="$CUSTOM_MODE_1" value="6"/> -->
+		<!-- <define name="$CUSTOM_MODE_2" value="7"/> -->
+		<!-- <define name="$CUSTOM_MODE_3" value="8"/> -->
+		<!-- <define name="$DEVICE_SELECT" value="9"/> -->
+		<!-- <define name="$NAVIGATION" value="10"/> -->
+        
+		<!-- <define name="$SESSION[STEP_EDIT_MODE]" value="0" /> -->
+        <!-- <define name="$SESSION[EVENT_EDIT_MODE]" value="1" /> -->
+        <!-- <define name="$SESSION[SETUP_MODE]" value="2" /> -->
+        <!-- <define name="$SESSION[BANK_MENU_MODE]" value="3" /> -->
+        <!-- <define name="$SESSION[HUI_MODE]" value="4" /> -->
+        <!-- <define name="$SESSION[LOOP_EDIT_MODE]" value="5" /> -->
+        <!-- <define name="$SESSION[INSTRUMENT_EDIT_MODE]" value="6" /> -->
+
+		<!-- ******************************************************************************************** -->
+		<!-- PAD SECTION -->
+		<!-- ******************************************************************************************** -->
+		<!-- There are two modes for the pads, Drum Layout and Session Layout -->
+		<!-- On entering DAW mode we default to Session Layout so building these pads as default -->
+		<!-- However, we quickly switch to Drum Layout at the script initialization -->
+		<PadSection name="PadSectionElement" rows="2" roles="musicinput stepedit">
+			<foreach variable="$i" count="16">
+				<Pad control="pad[$i]">
+					<Value control="padLED[$i]" param="state"/>
+					<PlainValue control="padLEDColor[$i]" param="color"/>
+					<!-- <using device="@global"> -->
+						<!-- <PlainValue control="padEffect[$i]" param="padEffect[$i]"> -->
+						<!-- Effects could effectively just add to the current status -->
+						<!-- Status="#9A" implies Channel 10 so 0="#9A" , 1="#9B",  2= "#9C" -->
+					<!-- </using> -->
+				</Pad>
+			</foreach>
+		</PadSection>
+
+		<!-- ******************************************************************************************** -->
+        <!-- GLOBAL MAPPING -->
+        <!-- ******************************************************************************************** -->
+        <Global>
+			<Toggle control="shift" param="shiftModifier" options="nonlatching"/>
+            <Toggle control="sceneHold" param="sceneHold" options="nonlatching" />
+			
+			<PlainValue control="sceneLED" param="sceneColor" />
+            <PlainValue control="sceneEffect" param="sceneEffect" />
+            
+			<Value control="devicePadMode" param="devicePadMode" />
+
+            <Variant control="sceneHold">
+                <Null />
+                <Group>
+                    <PlainValue control="sceneLED" param="GREEN" />
+                    <PlainValue control="sceneEffect" param="EFFECT_PULSE" />
+                </Group>
+            </Variant>
+
+            <!-- ******************************************************************************************** -->
+            <!-- Default controls for any pad mode.  -->
+            <!-- ******************************************************************************************** -->
+             
+        </Global>
+		
+        <!-- ******************************************************************************************** -->
+        <!-- NOTE TRANSPORT PANEL -->
+        <!-- ******************************************************************************************** -->
+        <DeviceMapping device="TransportPanel" name="TransportPanelElement" onConnect="renderGlobals">
+
+            <Segmented control="timeCode" param="primaryTime"/>
+
+            <ParamInvoke param="start" onChanged="renderGlobals" />
+            <ParamInvoke param="record" onChanged="renderGlobals" />
+            <ParamInvoke param="loop" onChanged="renderGlobals" />
+
+            <ParamVariant param="loop">
+                <Command control="arp" command.category="Transport" command.name="Return to Zero" />
+                <Command control="arp" command.category="Transport" command.name="Goto Loop Start" />
+            </ParamVariant>
+
+            <ParamVariant using="@global" param="shiftModifier">
+                <Variant control="sceneHold">
+                    <Group><!-- SCENE MODIFER OFF -->
+                        <Command control="play" command.category="Transport" command.name="Toggle Start" />
+                        <Command control="record" command.category="Transport" command.name="Record" />
+                    </Group>
+                    <Group><!-- SCENE MODIFER ON -->
+                        <Invoke control="play" onReceive="onToggleLoopEditMode" />
+                        <Command control="record" command.category="Edit" command.name="Undo" />
+                    </Group>
+                </Variant>
+                <Group>
+                    <Toggle control="play" param="loop" />
+                    <Command control="record" command.category="Track" command.name="Arm" />
+                </Group>
+            </ParamVariant>
+        </DeviceMapping>
+
+        <!-- ******************************************************************************************** -->
+		<!-- MIXER MAPPING -->
+		<!-- ******************************************************************************************** -->
+
+		<DeviceMapping device="MixerConsole" name="MixerMapping">
+			<ScrollBank target="FollowBank" name="FocusBankElement">
+				<Strip onConnect="onMixerConsoleFollowBankChanged"/>
+			</ScrollBank>
+		</DeviceMapping>
+
+		<!-- ******************************************************************************************** -->
+		<!-- INSTRUMENT TRACK MAPPINGS -->
+		<!-- ******************************************************************************************** -->
+
+		<DeviceMapping device="MusicTrackDevice" name="MusicTrackMapping">
+			<Bank target="FocusChannel" name="FocusChannelMapping">
+				<Strip onConnect="onMusicTrackFocusChannelChanged"/>
+			</Bank>
+			<Bank target="FocusInstrument" name="FocusInstrumentMapping">
+				<!-- Detect sampler device for sampler controls. -->
+				<Strip onConnect="onFocusInstrumentChanged"/>
+			</Bank>
+		</DeviceMapping>
+
+		<!-- ******************************************************************************************** -->
+		<!-- NOTE REPEAT MAPPING -->
+		<!-- ******************************************************************************************** -->
+
+		<DeviceMapping name="NoteRepeatElement" device="NoteRepeater" onConnect="onConnectNoteRepeat">
+			<Invoke control="noterepeat" onReceive="onNoteRepeatButtonPressed"/>
+			<Value control="noterepeatLED" param="active"/>
+			<ParamInvoke param="active" onChanged="onActivateNoteRepeat"/>
+			<ParamInvoke param="spread" onChanged="onSpreadModeChanged"/>
+		</DeviceMapping>
+		
+        <!-- ******************************************************************************************** -->
+		<!-- METRONOME MAPPING -->
+		<!-- ******************************************************************************************** -->
+
+		<DeviceMapping device="Metronome">
+			<ParamVariant using="@global" param="shiftModifier">
+				<!-- Shift off-->
+				<Group>
+					<Toggle control="click" param="clickOn"/>
+					<Value control="clickLED" param="clickOn"/>
+				</Group>
+				<!-- Shift on -->
+				<Group>
+					<Toggle control="click" param="precount"/>
+					<Value control="clickLED" param="precount"/>
+				</Group>
+			</ParamVariant>
+		</DeviceMapping>
+
+	</Mappings>
+</ControlSurface>

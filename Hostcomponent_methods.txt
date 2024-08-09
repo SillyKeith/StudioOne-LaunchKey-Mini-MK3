@@ -1,0 +1,105 @@
+	// hostComponent methods
+    // const presonusComponent = this.hostComponent;
+    Component Prototype Methods: find
+	Method Details: function find() 
+
+    // hostComponent.model methods
+    // this.model = hostComponent.model;
+    // const presonusModelComponent = this.model;
+	Component Prototype Methods: lockRecentParameter,setControlOption
+	Method Details: function lockRecentParameter() 
+	Method Details: function setControlOption()
+
+    // hostComponent.model.root methods  
+    // this.model = hostComponent.model;
+    // const presonusModelComponent = this.model.root;
+	// const presonusModelComponent = this.model.root;
+    Component Prototype Methods: find
+	Method Details: function find() 
+	Component Prototype Methods: getGlobalMapping,getRecentParamMapping,getGenericMapping,getPlacementGroup,getPlacementGroupSize
+	Method Details: function getGlobalMapping() 
+	Method Details: function getRecentParamMapping() 
+	Method Details: function getGenericMapping()
+	Method Details: function getPlacementGroup() 
+	Method Details: function getPlacementGroupSize() 
+	
+	// paramList methods
+    let paramList = hostComponent.paramList;
+	Component Prototype Methods: add,addParam,addFloat,addInteger,addString,addList,addMenu,addCommand,addColor,addAlias,addImage,remove,lookup"/>
+	Method Details: function add()
+	Method Details: function addParam()
+	Method Details: function addFloat()
+	Method Details: function addInteger()
+	Method Details: function addString()
+	Method Details: function addList()
+	Method Details: function addMenu()
+	Method Details: function addCommand()
+	Method Details: function addColor()
+	Method Details: function addAlias()
+	Method Details: function addImage()
+	Method Details: function remove()
+	Method Details: function lookup()
+	
+	
+	this.bankMenu = paramList.addInteger(0, kBankCount - 1, "bankMenu");
+	this.sceneHold = paramList.addParam("sceneHold");
+	this.bankMenuColor = paramList.addColor("bankButtonColor");
+	this.bankList = paramList.addList("bankList");
+	channel.padSelectColor = paramList.addAlias("padSelectColorValue" + i);
+
+	.addCommand
+	case PadSectionMode.kSetupMode:
+	{
+		let commands = [];
+		for (let padIndex = 0; padIndex < 8; padIndex++)
+			PreSonus.PadSection.addCommand(commands, padIndex, "", "", "", PreSonus.PadSection.kCommandItemUserAssignable);
+		PreSonus.PadSection.addCommand(commands, PadIndex.kBrowser, "Browser", "Show Instruments", "", "0", PreSonus.HostUtils.kBrowserZone);
+		PreSonus.PadSection.addCommand(commands, PadIndex.kTempo, "Transport", "Tap Tempo", "", PreSonus.PadSection.kCommandItemDirect);
+		PreSonus.PadSection.addCommand(commands, PadIndex.kDuplicate, "Edit", "Duplicate");
+		PreSonus.PadSection.addCommand(commands, PadIndex.kDelete, "Edit", "Delete");
+		c.addCommandInputHandler(commands);
+		c.getHandler(mode).setPadColor(kPadCommandColor);
+
+    // channelBankElement methods
+    //
+    // channelBankElement.addToBank(bankName, element);
+    // channelBankElement.selectBank(bankName); 
+    // channelBankElement.emptyBank(bankName);
+    // channelBankElement.selectBankDeferred(bankName);
+    // channelBankElement.getBankChildCount();
+
+    enterChannelLockMode(state) {
+        if (this.channelLockSupported) {
+            if (state) {
+                if (this.channelBankElement.target == FP2Banks.kFollow && this.channelBankElement.getBankChildCount() > 0) {
+                    let channelStripElement = this.channelBankElement.getElement(0);
+                    this.channelBankElement.addToBank(this.channelLockBankName, channelStripElement);
+                    this.channelBankElement.selectBank(this.channelLockBankName);
+                }
+            }
+            else {
+                if (this.channelBankElement.target != FP2Banks.kFollow) {
+                    this.channelBankElement.selectBank(FP2Banks.kFollow);
+                    this.channelBankElement.emptyBank(this.channelLockBankName);
+                }
+            }
+            this.updateChannelLockState();
+        }
+        else
+            this.lockChannel.value = false;
+    }
+    updateChannelLockState() {
+        if (this.channelLockSupported) {
+            let locked = false;
+            if (this.channelBankElement.target == this.channelLockBankName) {
+                if (this.channelBankElement.getBankChildCount() > 0)
+                    locked = true;
+                else {
+                    this.channelBankElement.selectBankDeferred(FP2Banks.kFollow);
+                }
+            }
+            this.lockChannel.value = locked;
+            this.channelLinkColor.fromString(locked ? kLinkColorLocked : kLinkColorOn);
+            this.updateModeParams();
+        }
+    }

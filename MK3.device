@@ -1,0 +1,23 @@
+﻿<?xml version="1.0" encoding="UTF-8"?>
+<DeviceDefinition
+    classID="{D4E1F8A2-3B7C-4F9A-9C3B-7E2F4A6B8C5D}"
+
+    vendor="MK3"
+    name="MK3 Extended"
+
+    category="Keyboard"
+
+    nativeCode="JSKeyboardDevice"
+    surfaceFile="MK3.surface.xml"
+    
+    imageFile="LaunchKeyMKIII.png"
+    textFile="LaunchKeyMKIII.txt"
+    
+    classFile="MK3MidiDevice.js"
+    classFile.functionName="createMK3MidiDeviceInstance"
+
+    scriptFile="MK3Component.js"
+    scriptFile.functionName="createMK3ComponentInstance"
+
+    hostDataFile="MK3.surfacedata"
+/>

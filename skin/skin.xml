@@ -86,7 +86,7 @@
 		<!-- Novation -->
 		<!-- ******************************************************************************************** -->
 
-		<Form name="Novation LaunchKeyMKIII" style="NovationBackcolor" options="colorize" width="862" height="270" datatarget="ControlSurface/Editor/ControlList">
+		<Form name="Novation LaunchKeyMKIII" style="NovationBackcolor" options="colorize" width="862" height="500" datatarget="ControlSurface/Editor/ControlList">
 			<ImageView image="NovationBackground"/>
 			<ImageView size="5,149,852,115" options="colorize" style="NovationPadBackcolor"/>
 			<using controller="ControlSurface/Editor">
@@ -101,14 +101,38 @@
 							<View width="100" height="90">
 								<using controller="knob[$i]">
 									<Knob name="controlValue" options="decrement transparent" size="25,13,54,54" />
-									<TextBox name="userAssignment" size="1,73,100,18" options="fittext transparent nocontextmenu" style="NovationText"/>
+									<!-- removed nocontextmenu from options so I could assign commands -->
+									<TextBox name="userAssignment" size="1,73,100,18" options="fittext transparent" style="NovationText"/>
 								</using>
 							</View>
 						</foreach>
 					</Horizontal>
 
+					<!-- Drum Pads -->
+					<using controller="../PadSection2/Handler0"> <!-- the third padsection area of surface.xml -->
+						<Table margin="0" spacing="2" columns="8">						
+							<foreach variable="$i" start="0" count="16">
+								<View width="106" height="102">
+									<using controller="drumPad[$i]">
+										<Button name="" style="NovationPadBackground" options="" size="0,0,106,102"/>
+										<Variant name="commandTitle" size="0,0,106,102">
+											<TextBox name="padNumber" size="11,11,18,18" style="PadNumberStyle"/>
+											<View>
+												<ColorBox name="commandColor" style="NovationPadColorBox" size="0,0,106,102">
+													<SelectBox name="commandColor" size="0,0,106,102" options="transparent hidetext hidefocus ignorekeys hidebutton nocontextmenu"/>
+													<TextBox name="padNumber" colorname="commandColor" size="11,11,18,18" style="PadNumberStyle"/>
+												</ColorBox>
+												<ImageView size="0,0,106,102" style="NovationPadOverlay"/>
+											</View>
+										</Variant>
+										<TextBox name="commandTitle" size="10,32,85,42" colorname="commandColor" options="fittext transparent nocontextmenu multiline" style="NovationPadText"/>
+									</using>
+								</View>
+							</foreach>
+						</Table>
+
 					<!-- Pad Commands in Setup Mode (Each sections represents a number from when the pad element or handler was added)-->
-					<using controller="../PadSection1/Handler0">
+					<using controller="../PadSection2/Handler0">
 					<Table margin="0" spacing="-2" columns="8">
 						<foreach variable="$i" in="0 1 2 3 4 5 6 7">
 							<View width="106" height="102">

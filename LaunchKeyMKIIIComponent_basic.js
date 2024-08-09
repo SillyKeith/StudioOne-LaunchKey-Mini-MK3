@@ -8,18 +8,18 @@
  * @License: GPL-3
  */
 // include SDK files from host
-// include_file("resource://com.presonus.musicdevices/sdk/controlsurfacecomponent.js");
-// include_file("resource://com.presonus.musicdevices/sdk/controlsurfacedevice.js");
-include_file("./resources/controlsurfacecomponent.js");
-include_file("./resources/controlsurfacedevice.js");
-include_file("Debug.js");
+include_file("resource://com.presonus.musicdevices/sdk/controlsurfacecomponent.js");
+include_file("resource://com.presonus.musicdevices/sdk/controlsurfacedevice.js");
+//include_file("./resources/controlsurfacecomponent.js");
+//include_file("./resources/controlsurfacedevice.js");
+//include_file("Debug.js");
 include_file("Modes.js");
 
 class LaunchKeyMK3BasicComponent extends PreSonus.ControlSurfaceComponent {
     onInit(hostComponent) {
         super.onInit(hostComponent);
         this.debugLog = true;
-        this.interfaces = [Host.Interfaces.IObserver, Host.Interfaces.IParamObserver];
+        //this.interfaces = [Host.Interfaces.IObserver, Host.Interfaces.IParamObserver];
 
         this.model = hostComponent.model;
 
@@ -30,7 +30,11 @@ class LaunchKeyMK3BasicComponent extends PreSonus.ControlSurfaceComponent {
         this.modes = new Modes(hostComponent);
         Host.Signals.advise("LaunchkeyMK3", this);
         this.log("LaunchKeyMK3BasicComponent initialized");
-        this.log("interface: " + this.interfaces + " paramList: " + paramList + " modes: " + this.modes + " model: " + this.model); 
+    }
+
+    onExit() {  // turn off notifications and unadvise signals
+        Host.Signals.unadvise("LaunchkeyMK3", this);
+        super.onExit();
     }
 
     /**
@@ -56,12 +60,15 @@ class LaunchKeyMK3BasicComponent extends PreSonus.ControlSurfaceComponent {
      * @param {object} msg - The notification message.
      */
     notify(subject, msg) {
-        this.log("Component_basic.js notify function" + subject + ': ' + msg.id);
-        if (msg.id == 'paramChanged') {
-            if (this[msg.getArg(0).name])
+        if (msg.id == 'paramChanged') {  // This notification is being passed into the Extended Component script
+            if (this[msg.getArg(0).name]) {  // Example items are shiftModifier and sceneHold
+                this.log(`BASIC- Setting parameter: ${msg.getArg(0).name} to ${msg.getArg(0).value}`);
                 this[msg.getArg(0).name].setValue(msg.getArg(0).value, true);
-            else if (this.modes.params[msg.getArg(0).name])
+            }
+            else if (this.modes.params[msg.getArg(0).name]) {
+                this.log("BASIC- Setting mode parameter: " + msg.getArg(0).name + " to " + msg.getArg(0).value);
                 this.modes.params[msg.getArg(0).name].setValue(msg.getArg(0).value, true);
+            }
             else {
                 // Handle unknown parameter
             }

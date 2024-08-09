@@ -1,129 +1,163 @@
 include_file("./resources/controlsurfacecomponent.js");
+
 const Effect = {
     NONE: 0,
     FLASH: 1,
     PULSE: 2
 };
 
-class Channel {
-    constructor() {
-        this.channelElement = {}; // Object
-        this.potValue = 0; // Used as a value
-        this.padSelect = 0; // Assuming initialization elsewhere or to be added
-        this.padSelectColor = 0; // Assuming initialization elsewhere or to be added
-        this.padToggle = 0; // Used as a value
-        this.padToggleColor = 0; // Used as a value
-        this.padToggleEffect = 0; // Used as a value
-        this.padSelectEffect = 0; // Used as a value
-        this.genericElement = {}; // Object
-    }
-
-    connectPot(element, paramName) {
+function Channel() {
+    // Log the properties of the Channel instance
+    logObjectProperties(this);
+       
+    this.connectPot = function(element, paramName) {
         if (!paramName) {
             paramName = element;
             element = this.channelElement;
         }
+        logObjectProperties(element);
+        logObjectProperties(this.potValue);
         return element.connectAliasParam(this.potValue, paramName);
     }
 
-    connectSelect(paramName) {
+    this.connectSelect = function(paramName) {
+        Host.Console.writeLine(`Inside connectSelect`);
         return this.channelElement.connectAliasParam(this.padSelect, paramName);
     }
 
-    connectSelectColor(paramName) {
+    this.connectSelectColor = function(paramName) {
+        Host.Console.writeLine(`Inside connectSelectColor`);
         return this.channelElement.connectAliasParam(this.padSelectColor, paramName);
     }
 
-    connectToggle(element, paramName) {
+    this.connectToggle = function(element, paramName) {
         if (!paramName) {
+            Host.Console.writeLine(`Channel class connectToggle: No paramName provided, setting paramName to element ${element}`); // Log the element
             paramName = element;
             element = this.channelElement;
         }
+        Host.Console.writeLine(`Channel() connectToggle: Connecting toggle to element: ${element}, paramName: ${paramName}`);
+        Host.Console.writeLine(`Is this.padToggle null or undefined?:: ${this.padToggle.value === null || this.padToggle.value === undefined}`);
         return element.connectAliasParam(this.padToggle, paramName);
     }
 
-    updateSelectEffect() {
+    this.updateSelectEffect = function() {
+        Host.Console.writeLine(`Inside updateSelectEffect`);
         if (this.channelElement.getParamValue('selected'))
             return this.padSelectEffect.setValue(Effect.PULSE);
 
         this.padSelectEffect.setValue(Effect.NONE);
     }
 
-    updateToggle(color_off, color_on, effect) {
-        Host.Console.writeLine(`Type of this.padToggle: ${typeof this.padToggle}`);
-        Host.Console.writeLine(`Type of this.padToggleColor: ${typeof this.padToggleColor}`);
-        Host.Console.writeLine(`Type of this.padToggleEffect: ${typeof this.padToggleEffect}`);
-        if (this.padToggle.value == null) {
+    this.updateToggle = function(color_off, color_on, effect) {
+        Host.Console.writeLine(`updateToggle - this.padToggle: ${this.padToggle.value}`);
+        if (this.padToggle.value === null || this.padToggle.value === undefined) { // Check if the value is null or undefined
+            //this.padToggle.setValue(0); // to handle undefined values.
             this.padToggleColor.setValue(0);
             this.padToggleEffect.setValue(Effect.NONE);
             return;
         }
-
         this.padToggleColor.fromString((this.padToggle.value) ? color_on : color_off);
-
+        Host.Console.writeLine(`We aren't null: this.padToggle.value: ${this.padToggle.value} padToggleColor: ${this.padToggleColor.value}`);
+        Host.Console.writeLine(`Checking effect && this.padToggle.value: ${effect && this.padToggle.value}`);
         if (effect && this.padToggle.value) {
             this.padToggleEffect.setValue(effect);
+            Host.Console.writeLine(`Setting effect to ${effect}`);
         } else {
             this.padToggleEffect.setValue(Effect.NONE);
         }
     }
 
-    setPotGeneric() {
-        this.genericElement.connectAliasParam(this.potValue, 'value');
+    /**
+     * Checks if the pad is set to generic.
+     * @returns {boolean} - True if the pad is generic, false otherwise.
+     */
+    this.isPadGeneric = function () {
+        return this.padGeneric;
     }
 
-    setToggleGeneric() {
+    /**
+     * Checks if the pot is set to generic.
+     * @returns {boolean} - True if the pot is generic, false otherwise.
+     */
+    this.isPotGeneric = function () {
+        return this.potGeneric;
+    }
+
+    this.setPotGeneric = function() {
+        this.genericElement.connectAliasParam(this.potValue, 'value');
+        this.padGeneric = true;
+    }
+
+    this.setToggleGeneric = function() {
+        Host.Console.writeLine(`Inside setToggleGeneric`);
         this.genericElement.connectAliasParam(this.padToggle, 'value');
     }
 
-    setSelectGeneric() {
+    this.setSelectGeneric = function() {
+        Host.Console.writeLine(`Inside setSelectGeneric`);
         this.genericElement.connectAliasParam(this.padSelect, 'value');
         this.genericElement.connectAliasParam(this.padSelectColor, 'value');
     }
 
-    setPadGeneric() {
+    this.setPadGeneric = function() {
+        Host.Console.writeLine(`Inside setPadGeneric`);
         this.setToggleGeneric();
         this.setSelectGeneric();
+        this.potGeneric = true;
     }
 }
 
-class PadMode {
-    constructor() {
-        this.effectParams = [];
-        this.renderHandlers = [];
-        this.activeRenderHandlers = [];
-    }
+function PadMode() {
+    this.effectParams;
 
-    init(index, component) {
+    this.init = function(index, component) {
         this.index = index;
         this.component = component;
         this.handler = component.getHandler(index);
     }
 
-    addRenderHandler(func) {
+    this.addRenderHandler = function(func) {
+        Host.Console.writeLine(`Entered addRenderHandler for ${this.id}`);
+        
+        if (!this.renderHandlers) {
+            this.renderHandlers = [];
+        } else {
+            Host.Console.writeLine(`renderHandlers array already exists for ${this.id}, length: ${this.renderHandlers.length}`);
+        }
+        
         this.renderHandlers.push(func.bind(this));
+        Host.Console.writeLine(`Added new render handler for ${this.id}, new length: ${this.renderHandlers.length}`);
     }
 
-    render(host, root) {
+    this.render = function(host, root) {
+        Host.Console.writeLine(`Entered render function for ${this.id}`);
         this.resetEffects();
+        if( ! this.renderHandlers )
+            return;
         this.renderHandlers.forEach(handler => handler(host, root));
     }
 
-    addActiveRenderHandler(func) {
+    this.addActiveRenderHandler = function(func) {
+        Host.Console.writeLine(`Entering active render handler`);
+        if( ! this.activeRenderHandlers )
+            this.activeRenderHandlers = [];
         this.activeRenderHandlers.push(func.bind(this));
     }
 
-    activeRender(host, root) {
+    this.activeRender = function(host, root) {
         // Reset the scene button
+        Host.Console.writeLine(`In activeRender for ${this.id}`);
         host.modes.params.scene_button.color.setValue(0);
         host.modes.params.scene_button.effect.setValue(0);
         host.modes.params.ssm_button.color.setValue(0);
         host.modes.params.ssm_button.effect.setValue(0);
-
+        if( ! this.activeRenderHandlers )
+            return
         this.activeRenderHandlers.forEach(handler => handler(host, root));
     }
 
-    setColor(pad, value) {
+    this.setColor = function(pad, value) {
         Host.Console.writeLine(`Setting color for pad: ${pad}, value: ${value}`);
         if (value.charAt(0) === '#') {
             value = Color.hexToInt(value);
@@ -131,164 +165,237 @@ class PadMode {
         return this.component.setPadColor(pad, value);
     }
 
-    toggle(pad, value, color_off, color_on) {
+    this.toggle = function(pad, value, color_off, color_on) {
         Host.Console.writeLine(`Toggling pad: ${pad}, value: ${value}`);
         this.component.setPadState(pad, true);
-        return this.setColor(pad, value ? color_on : color_off);
+        return this.setColor(pad, (value) ? color_on : color_off);
     }
 
-    setEffect(pad, effect) {
+    this.setEffect = function(pad, effect) {
         this.effectParams[pad].setValue(effect);
     }
 
-    resetEffects() {
+    this.resetEffects = function() {
         this.effectParams.forEach(param => param.setValue(Effect.NONE));
     }
 }
 
-Modes.HuiMode = function( id, color, toggleColor, effect )
+// Access by Index
+//      const currentModeIndex = 1; // Example index for 'drum'
+//      const currentMode = Modes.DevicePadModes[currentModeIndex];
+//      console.log(currentMode); // Output: DevicePadMode { id: 'drum', index: 1 }
+//
+// Using a Map for quick lookup
+//      const modeId = 'drum';
+//      const modeIndex = devicePadModeIdToIndexMap.get(modeId);
+//      const currentMode = Modes.DevicePadModes[modeIndex];
+//      console.log(currentMode); // Output: DevicePadMode { id: 'drum', index: 1 }
+//
+// Iterating through the array
+//      const modeId = 'drum';
+//      const currentMode = Modes.DevicePadModes.find(mode => mode.id === modeId);
+//      console.log(currentMode); // Output: DevicePadMode { id: 'drum', index: 1 }
+// 
+// Using a Method to get the current mode
+//      Modes.getCurrentDevicePadMode = function(modeId) {
+//          const modeIndex = devicePadModeIdToIndexMap.get(modeId);
+//          return this.DevicePadModes[modeIndex];
+//      };
+//      const currentMode = Modes.getCurrentDevicePadMode('drum');
+//      console.log(currentMode); // Output: DevicePadMode { id: 'drum', index: 1 }
+
+function DevicePadMode(id, index) 
+{
+    this.id = id;
+    this.index = index;
+};
+Modes.DevicePadModes = [
+    new DevicePadMode('custom-old', 0), // The real custom0 mode is at index 5
+    new DevicePadMode('drum', 1),
+    new DevicePadMode('session', 2),
+    new DevicePadMode('scalechords', 3),
+    new DevicePadMode('userchords', 4),
+    new DevicePadMode('custom', 5)
+];
+
+// Preprocess DevicePadModes
+const devicePadModeIdToIndexMap = new Map();
+Modes.DevicePadModes.forEach((mode) => {
+    devicePadModeIdToIndexMap.set(mode.id, mode.index); // Use the index property
+    // Link to next mode if applicable
+    mode.nextMode = Modes.DevicePadModes[mode.index + 1] || Modes.DevicePadModes[0]; // Adjusted to use the index property
+});
+
+DevicePotMode = function(id, index)
+{
+    this.id = id;
+    this.index = index;
+};
+Modes.DevicePotModes = [
+    new DevicePotMode('custom', 0),
+    new DevicePotMode('volume', 1),
+    new DevicePotMode('device', 2),
+    new DevicePotMode('pan', 3),
+    new DevicePotMode('sendA', 4),
+    new DevicePotMode('sendB', 5),
+    new DevicePotMode('custom', 6)  // added this to remove error when selecting custom as 6 is returned, not 0
+];
+
+// Preprocess DevicePotModes
+const devicePotModeIdToIndexMap = new Map();
+Modes.DevicePotModes.forEach((mode) => {
+    devicePotModeIdToIndexMap.set(mode.id, mode.index); // Use the index property
+    // Link to next mode if applicable
+    mode.nextMode = Modes.DevicePotModes[mode.index + 1] || Modes.DevicePotModes[0]; // Adjusted to use the index property
+});
+
+SessionMode.EffectParams = [];
+SessionMode.prototype = new PadMode();
+function SessionMode(id, color, skip, index) {
+    this.id = id;
+    this.color = color;
+    this.skip = skip;
+    this.index = index; // Add index property
+
+    this.effectParams = SessionMode.EffectParams;
+};
+
+// Update instantiation of SessionMode objects with index
+Modes.SessionModes = [
+    new SessionMode('stepedit', '#AAAA00', false, 0),
+    new SessionMode('eventedit', '#AAAA00', false, 1),
+    new SessionMode('setup', '#0000FF', false, 2),
+    new SessionMode('bank', '#00FF00', false, 3),
+    new SessionMode('hui', '#38FFCC', false, 4),
+    new SessionMode('loopedit', 'aqua', true, 5)
+];
+
+// Preprocess SessionModes
+const sessionModeIdToIndexMap = new Map();
+Modes.SessionModes.forEach((mode) => {
+    sessionModeIdToIndexMap.set(mode.id, mode.index); // Use the index property
+    // Link to next mode if applicable
+    mode.nextMode = Modes.SessionModes[mode.index + 1] || Modes.SessionModes[0]; // Adjusted to use the index property
+});
+
+DrumMode.EffectParams = [];
+DrumMode.prototype = new PadMode();
+function DrumMode(id, index)
+{
+    this.id = id;
+    this.effectParams = DrumMode.EffectParams;
+    this.index = index;
+};
+Modes.DrumModes = [
+    new DrumMode('play', 0),
+    new DrumMode('repeat_menu', 1),
+    new DrumMode('rate_trigger', 2)
+];
+
+// Preprocess DrumModes
+const drumModeIdToIndexMap = new Map();
+Modes.DrumModes.forEach((mode) => {
+    drumModeIdToIndexMap.set(mode.id, mode.index);
+    // Link to next mode if applicable
+    mode.nextMode = Modes.DrumModes[mode.index + 1] || Modes.DrumModes[0]; // Or Modes.DrumModes[0] to loop
+});
+
+Modes.HuiMode = function( id, color, toggleColor, effect, index )
 {
     this.id = id;
     this.color = color;
     this.toggleColor = toggleColor;
     this.effect = effect;
+    this.index = index;
 };
 Modes.HuiModes = [
-    new Modes.HuiMode('monitor', '#00A9FF', ['#00454F', '#00A9FF']),
-    new Modes.HuiMode('arm', '#FF4C87', ['#202020','#FF4C87'], Effect.PULSE),
-    new Modes.HuiMode('solo', '#FFE126', ['#392B00', '#FFE126']),
-    new Modes.HuiMode('mute', '#874CFF', ['#0F0030', '#874CFF'])
+    new Modes.HuiMode('monitor', '#00A9FF', ['#00454F', '#00A9FF'], Effect.NONE, 0),
+    new Modes.HuiMode('arm', '#FF4C87', ['#202020','#FF4C87'], Effect.PULSE, 1),
+    new Modes.HuiMode('solo', '#FFE126', ['#392B00', '#FFE126'], Effect.NONE, 2),
+    new Modes.HuiMode('mute', '#874CFF', ['#0F0030', '#874CFF'], Effect.NONE, 3)
 ];
 
-function DevicePadMode(id)
-{
-    this.id = id;
-};
-Modes.DevicePadModes = [
-    new DevicePadMode('custom'),
-    new DevicePadMode('drum'),
-    new DevicePadMode('session')
-];
+// Preprocess HuiModes
+const huiModeIdToIndexMap = new Map();
+Modes.HuiModes.forEach((mode) => {
+    huiModeIdToIndexMap.set(mode.id, mode.index);
+    // Link to next mode if applicable
+    mode.nextMode = Modes.HuiModes[mode.index + 1] || Modes.HuiModes[0]; 
+});
 
-DevicePotMode = function(id)
-{
-    this.id = id;
-};
-Modes.DevicePotModes = [
-    new DevicePotMode('custom'),
-    new DevicePotMode('volume'),
-    new DevicePotMode('device'),
-    new DevicePotMode('pan'),
-    new DevicePotMode('sendA'),
-    new DevicePotMode('sendB')
-];
+function Modes(hostComponent, bankCount) {
+        this.bankCount = bankCount;
+        this.drumElement = undefined;
+        this.sessionElement = undefined;
+        this.userDefinedElement = undefined;
 
+        let root = hostComponent.model.root;
+        let paramList = hostComponent.paramList;
 
-SessionMode.EffectParams = [];
-SessionMode.prototype = new PadMode();
-function SessionMode(id, color, skip)
-{
-    this.id = id;
-    this.color = color;
-    this.skip = skip;
+        this.params = {
+            device_pad: paramList.addInteger(0, 126, "devicePadMode"),
+            device_pot: paramList.addInteger(0, 126, "devicePotMode"),
+            drum: paramList.addInteger(0, Modes.DrumModes.length - 1, "drumMode"),
+            session: paramList.addInteger(0, Modes.SessionModes.length - 1, "sessionMode"),
+            hui: paramList.addInteger(0, Modes.HuiModes.length - 1, "huiMode"),
+            focus: paramList.addParam("padFocusMode"),
+            display: paramList.addInteger(0, 2, "padDisplayMode"),
+            scene_button: {
+                color: paramList.addColor('sceneColor'),
+                effect: paramList.addInteger(0, 2, 'sceneEffect')
+            },
+            ssm_button: {
+                color: paramList.addColor('ssmColor'),
+                effect: paramList.addInteger(0, 2, 'ssmEffect')
+            }
+        };
 
-    this.effectParams = SessionMode.EffectParams;
-};
-Modes.SessionModes = [
-    new SessionMode('stepedit', '#AAAA00'),
-    new SessionMode('eventedit', '#AAAA00'),
-    new SessionMode('setup', '#0000FF'),
-    new SessionMode('bank', '#00FF00'),
-    new SessionMode('hui', '#38FFCC'),
-    new SessionMode('loopedit', 'aqua', true)
-];
+        // The basic component does not send a bankCount, so we need to check if this was the caller before proceeding
+        if( ! bankCount )
+            return;
+        // add alias parameters for vpots, etc.
+        let channelBankElement = root.find ("MixerElement/RemoteBankElement");
+        this.channels = [];
+        for(let i = 0; i < bankCount; i++)
+        {
+            let channel = new Channel();
 
-DrumMode.EffectParams = [];
-DrumMode.prototype = new PadMode();
-function DrumMode(id)
-{
-    this.id = id;
-    this.effectParams = DrumMode.EffectParams;
-};
-Modes.DrumModes = [
-    new DrumMode('play'),
-    new DrumMode('repeat_menu'),
-    new DrumMode('rate_trigger')
-];
+            channel.genericElement = root.getGenericMapping().getElement(0).find ("knob[" + i + "]");
+            channel.channelElement = channelBankElement.getElement(i);
+            channel.sendsBankElement = channel.channelElement.find("SendsBankElement");
+            
+            channel.potValue = paramList.addAlias("potValue" + i);
 
-function Modes( hostComponent, bankCount )
-{
-    this.bankCount = bankCount;
+            channel.padSelect = paramList.addAlias("padSelectValue" + i);
+            channel.padSelectColor = paramList.addAlias("padSelectColorValue" + i);
+            channel.padSelectEffect = paramList.addInteger(0, 2, "padSelectEffectValue" + i);
 
-    this.drumElement;
-    this.sessionElement;
-    this.userDefinedElement;
+            channel.padToggle = paramList.addAlias("padToggleValue" + i);
+            channel.padToggleColor = paramList.addColor("padToggleColorValue" + i);
+            channel.padToggleEffect = paramList.addInteger(0, 2, "padToggleEffectValue" + i);
 
-    let root = hostComponent.model.root;
-    let paramList = hostComponent.paramList;
-    this.params = {
-        device_pad: paramList.addInteger(0, 126, "devicePadMode"),
-        device_pot: paramList.addInteger(0, 126, "devicePotMode"),
-        drum: paramList.addInteger(0, Modes.DrumModes.length - 1, "drumMode"),
-        session: paramList.addInteger(0, Modes.SessionModes.length - 1, "sessionMode"),
-        hui: paramList.addInteger(0, Modes.HuiModes.length - 1, "huiMode"),
-        focus: paramList.addParam("padFocusMode"),
-        display: paramList.addInteger(0, 2, "padDisplayMode"),
-        scene_button: {
-            color: paramList.addColor('sceneColor'),
-            effect: paramList.addInteger(0, 2, 'sceneEffect')
-        },
-        ssm_button: {
-            color: paramList.addColor('ssmColor'),
-            effect: paramList.addInteger(0, 2, 'ssmEffect')
+            this.channels.push(channel);
         }
-    };
 
-    // This assumes basic version instantiated
-    if( ! bankCount )
-        return;
-    // add alias parameters for vpots, etc.
-    let channelBankElement = root.find ("MixerElement/RemoteBankElement");
-    this.channels = [];
-    for(let i = 0; i < bankCount; i++)
-    {
-        let channel = new Channel();
-
-        channel.genericElement = root.getGenericMapping().getElement(0).find ("knob[" + i + "]");
-        channel.channelElement = channelBankElement.getElement(i);
-        channel.sendsBankElement = channel.channelElement.find("SendsBankElement");
-
-        channel.potValue = paramList.addAlias("potValue" + i);
-
-        channel.padSelect = paramList.addAlias("padSelectValue" + i);
-        channel.padSelectColor = paramList.addAlias("padSelectColorValue" + i);
-        channel.padSelectEffect = paramList.addInteger(0, 2, "padSelectEffectValue" + i);
-
-        channel.padToggle = paramList.addAlias("padToggleValue" + i);
-        channel.padToggleColor = paramList.addColor("padToggleColorValue" + i);
-        channel.padToggleEffect = paramList.addInteger(0, 2, "padToggleEffectValue" + i);
-
-        this.channels.push(channel);
-    }
-
-    for( let i = 0; i < 16; i++ )
-        DrumMode.EffectParams.push( paramList.addInteger(0, 2, "drumPadEffect["+i+"]") );
-    for( let i = 0; i < 8; i++ ) {
-        SessionMode.EffectParams.push( paramList.addInteger(0, 2, "sessionHigherPadEffect["+i+"]") );
-        SessionMode.EffectParams.push( paramList.addInteger(0, 2, "sessionLowerPadEffect["+i+"]") );
-    }
-    this.lastTrackEditorType = PreSonus.HostUtils.kEditorTypeNone;
-
+        for( let i = 0; i < 16; i++ )
+            DrumMode.EffectParams.push( paramList.addInteger(0, 2, "drumPadEffect["+i+"]") );
+        for( let i = 0; i < 8; i++ ) {
+            SessionMode.EffectParams.push( paramList.addInteger(0, 2, "sessionHigherPadEffect["+i+"]") );
+            SessionMode.EffectParams.push( paramList.addInteger(0, 2, "sessionLowerPadEffect["+i+"]") );
+        }
+        this.lastTrackEditorType = PreSonus.HostUtils.kEditorTypeNone;
+    
     this.setupDrumModes = function( _padElement, _repeatRates, _repeatRateAlias )
     {
         this.drumElement = _padElement;
 
         let padComponent = _padElement.component;
         padComponent.setPadColoringSupported(true);
-
+        Host.Console.writeLine("Setting up drum modes " + Modes.DrumModes.length);
         Modes.DrumModes.forEach((mode, i) => {
             switch(mode.id) {
                 case 'play':
+                    Host.Console.writeLine("setupDrumModes: Setting up play mode " + mode + "id: " + mode.id);
                     padComponent.addHandlerForRole(PreSonus.PadSectionRole.kMusicInput);
                     this.params.display.setValue(1, true);
                     padComponent.getHandler(i).setDisplayMode(PreSonus.MusicPadDisplayMode.kDimmedColors);
@@ -298,18 +405,38 @@ function Modes( hostComponent, bankCount )
                         Host.Console.writeLine(`PLAY: Setting color for padComponent handler ${i}, bank ${ii} to ${Color.Bank[i]}`);
                     }
                     break;
-                case 'repeat_menu':
-                    let commands = [];
-                    PreSonus.PadSection.addCommand(commands, 6, "Note Repeat", "Quantize");
-                    PreSonus.PadSection.addCommand(commands, 7, "Note Repeat", "Aftertouch");
-                    mode.addRenderHandler(function(host, root) {
-                        let ele = host.noteRepeatElement;
-                        this.toggle(6, ele.getParamValue('quantize'), '#222200', '#00FF00');
-                        this.toggle(7, ele.getParamValue('pressureHandling'), '#222200', '#00FF00');
-                    });
-                    padComponent.addCommandInputHandler(commands);
-                    break;
+                    case 'repeat_menu':
+                        Host.Console.writeLine("setupDrumModes: Setting up repeat_menu mode " + mode + " id: " + mode.id);
+                        let commands = [];
+                        Host.Console.writeLine("Initializing commands array");
+                    
+                        PreSonus.PadSection.addCommand(commands, 6, "Note Repeat", "Quantize");
+                        Host.Console.writeLine("Added command: Note Repeat, Quantize to commands array");
+                    
+                        PreSonus.PadSection.addCommand(commands, 7, "Note Repeat", "Aftertouch");
+                        Host.Console.writeLine("Added command: Note Repeat, Aftertouch to commands array");
+                    
+                        mode.addRenderHandler(function(host, root) {
+                            Host.Console.writeLine("Render handler called for repeat_menu mode");
+                            let ele = host.noteRepeatElement;
+                            Host.Console.writeLine("Retrieved noteRepeatElement from host");
+                    
+                            let quantizeValue = ele.getParamValue('quantize');
+                            Host.Console.writeLine("Quantize value: " + quantizeValue);
+                            this.toggle(6, quantizeValue, '#222200', '#00FF00');
+                            Host.Console.writeLine("Toggled button 6 with quantize value");
+                    
+                            let pressureHandlingValue = ele.getParamValue('pressureHandling');
+                            Host.Console.writeLine("Pressure handling value: " + pressureHandlingValue);
+                            this.toggle(7, pressureHandlingValue, '#222200', '#00FF00');
+                            Host.Console.writeLine("Toggled button 7 with pressure handling value");
+                        });
+                    
+                        padComponent.addCommandInputHandler(commands);
+                        Host.Console.writeLine("Added command input handler to padComponent");
+                        break;
                 case 'rate_trigger':
+                    Host.Console.writeLine("setupDrumModes: Setting up rate_trigger mode " + mode + "id: " + mode.id);
                     padComponent.addHandlerForRole(PreSonus.PadSectionRole.kRateTrigger);
                     padComponent.getHandler(i).setPadColor(Color.References['rate_trigger']);
                     for(let key in _repeatRates)
@@ -323,39 +450,53 @@ function Modes( hostComponent, bankCount )
             mode.init(i, padComponent);
         });
     }
-
+    
+    /**
+     * Sets up session modes for the given pad element, user-defined element, and bank menu element.
+     * 
+     * @param {Object} _padElement - The pad element to set up session modes for.
+     * @param {Object} _userDefined - The user-defined element to set up session modes for.
+     * @param {Object} _bankMenuElement - The bank menu element to set up session modes for.
+     */
     this.setupSessionModes = function( _padElement, _userDefined, _bankMenuElement )
     {
+        Host.Console.writeLine("Entered setupSessionModes");
+        
+        // Assign the session and user-defined elements
         this.sessionElement = _padElement;
         this.userDefinedElement = _userDefined;
-
+        
+        // Get the pad component and enable pad coloring support
         let padComponent = _padElement.component;
         padComponent.setPadColoringSupported(true);
         _userDefined.component.setPadColoringSupported(true);
 
-        let i = 0;
-        for( let key in Color.PRESONUS_SNAP )
-        {
-            if( i++ % 2 ) continue;
-            _userDefined.component.addPadPaletteColor('#' + Color.convert(key).hex );
-        }
+        // Add colors to the user-defined component's pad palette
+        Object.keys(Color.PRESONUS_SNAP).forEach((key, index) => {
+            if (index % 2 === 0) {
+                _userDefined.component.addPadPaletteColor('#' + Color.convert(key).hex);
+            }
+        });
+        
+        Color.SnapColors.forEach(color => {
+            _userDefined.component.addPadPaletteColor(color);
+        });
 
-        for( let i in Color.SnapColors )
-            _userDefined.component.addPadPaletteColor(Color.SnapColors[i]);
-
-        for(let i = 0; i < Modes.SessionModes.length; i++)
-        {
-            let mode = Modes.SessionModes[i];
+        Host.Console.writeLine("Setting up session modes ");
+        Host.Console.writeLine("sessionModeIdToIndexMap length " + sessionModeIdToIndexMap.size);
+        Modes.SessionModes.forEach((mode, index) => { 
             switch(mode.id)
             {
                 case 'stepedit':
+                    Host.Console.writeLine(`Setting up stepedit mode for id: ${mode.id} index: ${mode.index}`);
                     padComponent.addHandlerForRole(PreSonus.PadSectionRole.kStepEdit);
-                    padComponent.getHandler(i).setPadColor(Color.References['command']);
+                    padComponent.getHandler(index).setPadColor(Color.References['command']);
                     break;
 
                 case 'eventedit':
                     {
-                        let commands = [];
+                        Host.Console.writeLine(`Setting up eventedit mode for id: ${mode.id} index: ${mode.index}`);
+                        const commands = []; // Initialize the commands array changed from let to const
                         PreSonus.PadSection.addCommand (commands, 10, "Edit", "Duplicate", 0, null, '#E2D762');
                         PreSonus.PadSection.addCommand (commands, 15, "Edit", "Delete", 0, null, '#FF0000');
                         // NOTE: macro command names contain the base64-encoded macro filename (e.g. "Vel +10")
@@ -363,19 +504,20 @@ function Modes( hostComponent, bankCount )
                         PreSonus.PadSection.addCommand (commands, 7, "Macros", "Macro VmVsICsxMA==", 0, null, '#00AA00');
 
                         padComponent.addCommandInputHandler(commands);
-                        padComponent.getHandler(i).setPadColor(Color.References['command']);
+                        padComponent.getHandler(index).setPadColor(Color.References['command']);
                     } break;
 
                 case 'setup':
                     {
-                        let commands = [];
-                        let userCommands = [];
+                        Host.Console.writeLine(`Setting up setup mode for id: ${mode.id} index: ${mode.index}`);
+                        const commands = []; // Initialize the commands array changed from let to const
+                        const userCommands = []; // Initialize the userCommands array changed from let to const
 
                         // make first 8 pads user-assignable
                         for(let ii = 0; ii < 8; ii++)
                             PreSonus.PadSection.addCommand(userCommands, ii, "", "", PreSonus.PadSection.kCommandItemUserAssignable);
                         _userDefined.component.addCommandInputHandler(userCommands);
-                        // We activate userdefined commands her as the xml will only enable this component in setup mode
+                        // We activate userdefined commands here as the xml will only enable this component in setup mode
                         _userDefined.component.setActiveHandler(0);
 
                         PreSonus.PadSection.addCommand(commands, 8, "Transport", "Tap Tempo", PreSonus.PadSection.kCommandItemDirect, null, '#0000FF');
@@ -391,26 +533,28 @@ function Modes( hostComponent, bankCount )
                             this.setEffect(8, Effect.PULSE);
                             this.setEffect(15, Effect.FLASH);
 
-                            let ele = host.metronomeElement;
+                            const ele = host.metronomeElement;
                             this.toggle(12, ele.getParamValue('clickOn'), '#222200', '#00FF00');
                             this.toggle(13, ele.getParamValue('precount'), '#222200', '#00FF00');
                         });
 
                         padComponent.addCommandInputHandler(commands);
-                        padComponent.getHandler(i).setPadColor(Color.References['command']);
+                        padComponent.getHandler(index).setPadColor(Color.References['command']);
                     } break;
                 case 'bank':
                     {
-                        let items = [];
+                        Host.Console.writeLine(`Setting up bank mode for id: ${mode.id} index: ${mode.index}`);
+                        const items = [];
                         for(let ii = 0; ii < this.bankCount; ii++)
                             items.push ({"padIndex": ii, "value": ii, "color": Color.Bank[ii]});
 
                         padComponent.addMenuHandler(items, _bankMenuElement);
-                        padComponent.getHandler(i).setPadColor(Color.References['default_bank']);
+                        padComponent.getHandler(index).setPadColor(Color.References['default_bank']);
                     } break;
                 case 'loopedit':
                     {
-                        let commands = [];
+                        Host.Console.writeLine(`Setting up loopedit mode for id: ${mode.id} index: ${mode.index}`);
+                        const commands = [];
                         PreSonus.PadSection.addCommand(commands, 0, "Zoom", "Zoom to Loop", 0, null, '#00FFFF');
 
 						PreSonus.PadSection.addCommand(commands, 1, "Transport", "Loop Follows Selection", 0, null, '#005500');
@@ -424,27 +568,30 @@ function Modes( hostComponent, bankCount )
                         PreSonus.PadSection.addCommand(commands, 15, "Transport", "Set Loop End", 0, null, '#FF0000');
 
                         padComponent.addCommandInputHandler(commands);
-                        padComponent.getHandler(i).setPadColor(Color.References['command']);
+                        padComponent.getHandler(index).setPadColor(Color.References['command']);
 
                         mode.addActiveRenderHandler( function(host, root) {
                             host.modes.params.scene_button.effect.setValue(Effect.PULSE);
                         });
                     } break;
                 default:
+                    Host.Console.writeLine(`Setting up default mode and adding null handler for id: ${mode.id} index: ${mode.index}`);
                     padComponent.addNullHandler();
                     break;
             }
             // Global Initiations For Session Modes
-            mode.init(i, padComponent);
+            mode.init(index, padComponent);
             mode.addActiveRenderHandler( function(host, root) {
-                if( host.modes.getCurrentDevicePadMode().id == 'session' )
+                Host.Console.writeLine(`Setting active render handler for ${mode.id}`);
+                Host.Console.writeLine(`We're going to go check if host.modes.getCurrentDevicePadMode().id === 'session' (true/false): ` + (host.modes.getCurrentDevicePadMode().id === 'session'));
+                if( host.modes.getCurrentDevicePadMode().id === 'session')
                     host.modes.params.scene_button.color.fromString(mode.color);
             });
-        }
+        });
     }
 
-    this.storeState = function()
-    {
+    this.storeState = function() {
+        Host.Console.writeLine(`Storing state currentDrum, Session, DevicePad`);
         this.store = {
             drum: this.getCurrentDrumMode(),
             session: this.getCurrentSessionMode(),
@@ -452,10 +599,10 @@ function Modes( hostComponent, bankCount )
         };
     }
 
-    this.restoreState = function()
-    {
+    this.restoreState = function() {
         if( this.store )
         {
+            Host.Console.writeLine(`Restoring state currentDrum, Session, DevicePad`);
             this.setDevicePadMode(this.store.device_pad.id);
             this.setSessionMode(this.store.session.id);
             this.setDrumMode(this.store.drum.id);
@@ -463,218 +610,240 @@ function Modes( hostComponent, bankCount )
         }
     }
 
-    /**
-    * Helper to ensure index is assigned to mode object
-    **/
-    this._getModeByIndex = function( modeArr, i )
-    {
-        if (i < 0 || i >= modeArr.length || !modeArr[i]) {
-            return null; // Or handle the error as appropriate but without this the code will crash modeArr[i] undefined.
+    // Device Pad Mode Functions
+    //
+    // getDevicePadMode      is never called anymore!!
+    //
+    //this.getDevicePadMode = function(id) {  
+    //    const index = devicePadModeIdToIndexMap.get(String(id)); // Ensure id is a string
+    //    Host.Console.writeLine(`getDevicePadMode Getting device pad mode: ${id} index=${index}`);
+    //    if (index !== undefined) {
+    //        Host.Console.writeLine(`getDevicePadMode Returning device pad mode index: ${Modes.DevicePadModes[index]}`);
+    //        return Modes.DevicePadModes[index];
+    //    }
+    //    return null; // Or handle the case where the id is not found
+    //}
+
+    this.getCurrentDevicePadMode = function() { // We need to return the mode object
+        const index = this.params.device_pad.value; // This is the index of the mode (0, 1, 2) 
+        // Host.Console.writeLine(`getCurrentDevicePadMode - Getting current device pad mode: ${index}`);
+        return Modes.DevicePadModes.find(mode => mode.index === index);
+    }
+
+    this.setDevicePadMode = function(id) {  // id is a string 'drum' or 'session'
+        const index = devicePadModeIdToIndexMap.get(String(id)); // Use the IndexMap to translate the id('drum',etc) to an index. Replaces the need for getDevicePadMode
+        // Host.Console.writeLine(`setDevicePadMode Trying to set device pad mode: ${id}:index=${index}`);
+        if (index !== undefined) {
+            this.params.device_pad.setValue(index, true);  // Set the value of the device pad mode
+        } else {
+            // Handle the case where the id is not found. We should not get here.
+            Host.Console.writeLine(`setDevicePadMode Error: Mode with ID ${id} not found.`);
+            return null;
         }
-        if( ! modeArr[i].index )
-            modeArr[i].index = i;
-        return modeArr[i];
     }
 
-    this.getModeById = function( modeArr, id )
-    {
-        for( let i = 0; i < modeArr.length; i++ )
-        {
-            if( modeArr[i].id == id )
-                return this._getModeByIndex(modeArr, i);
+    // Device Pot Mode Functions
+    //
+    // getDevicePotMode      is never called anymore!!
+    //
+    //this.getDevicePotMode = function(id) {  
+        // Directly return the DevicePotMode object using the id
+    //    Host.Console.writeLine(`getDevicePotMode - Getting device pot mode: ${id}`);
+    //    return Modes.DevicePotModes.find(mode => mode.id === id);
+    //}
+
+    this.getCurrentDevicePotMode = function() { // We need to return the mode object
+        const index = this.params.device_pot.value; // This is the index of the mode (0, 1, 2) 
+        // Host.Console.writeLine(`getCurrentDevicePotMode - Getting current device pot mode: ${index}`);
+        return Modes.DevicePotModes.find(mode => mode.index === index);
+    }
+
+    this.setDevicePotMode = function(id) {
+        //const index = this.getDevicePotMode(id).index;
+        const index = devicePotModeIdToIndexMap.get(String(id)); // Use the IndexMap to translate the id('custom', 'volume', 'device',etc) to an index. Replaces the need for getDevicePotMode
+        Host.Console.writeLine(`setDevicePotMode - Setting device pot mode: ${id} index=${index}`);
+        if (index !== undefined) {
+            this.params.device_pot.setValue(index, true);
+        } else {
+            Host.Console.writeLine(`setDevicePotMode - Error: Mode with ID ${id} not found.`);
+            return null;
         }
     }
 
-    this.getNextMode = function( modeArr, fromIndex, checkSkip )
-    {
-        if (modeArr.length === 0) {
-            // console.error("modeArr is empty");
-            return null; // Or handle the error as appropriate but without this the code will crash modeArr[i] undefined.
-        }
-        
-        let originalIndex = fromIndex;
-        do {
-            fromIndex++;
-            if( fromIndex > modeArr.length - 1 )
-            fromIndex = 0;
-        
-            // Prevent infinite loop if all modes should be skipped
-            if (fromIndex === originalIndex) {
-                // console.error("All modes are skipped or only one mode available");
-                return null; // Or handle as appropriate
-            }
-
-    } while (checkSkip && modeArr[fromIndex] && modeArr[fromIndex].skip);
-        // if( checkSkip && modeArr[fromIndex].skip )
-        //    return this.getNextMode( modeArr, fromIndex, checkSkip );
-
-        return this._getModeByIndex(modeArr, fromIndex);
-    }
-
-    this.getDevicePadMode = function( id )
-    {
-        var modeObject = this.getModeById( Modes.DevicePadModes, id );
-        Host.Console.writeLine("Getting device pad mode " + id);
-        Host.Console.writeLine("Modes.DevicePadModes array length " + Modes.DevicePadModes.length);
-        Host.Console.writeLine("Mode object " + modeObject + " id " + modeObject.id);
-        return this.getModeById( Modes.DevicePadModes, id );
-            }
-
-    this.getCurrentDevicePadMode = function()
-    {
-        return this._getModeByIndex(Modes.DevicePadModes, this.params.device_pad.value);
-    }
-
-    this.setDevicePadMode = function( id )
-    {
-        let index = this.getDevicePadMode( id ).index;
-        this.params.device_pad.setValue( index, true );
-    }
-
-    this.getDevicePotMode = function( id )
-    {
-        return this.getModeById( Modes.DevicePotModes, id );
-    }
-
-    this.getCurrentDevicePotMode = function()
-    {
-        return this._getModeByIndex(Modes.DevicePotModes, this.params.device_pot.value);
-    }
-
-    this.setDevicePotMode = function( id )
-    {
-        let index = this.getDevicePotMode( id ).index;
-        this.params.device_pot.setValue( index, true );
-    }
-
+    //Session Mode Functions
     this.isSessionMode = function()
-    {
-        return this.getCurrentDevicePadMode().id == 'session';
+    { // ${this.getCurrentDevicePadMode().id}` = a string 'drum' or 'session'
+        const currentMode = this.getCurrentDevicePadMode();
+        //Host.Console.writeLine(`isSessionMode Current device pad mode: ${currentMode.id} result: ${currentMode.id === 'session'}`);
+        return currentMode.id === 'session';
     }
 
-    this.getSessionMode = function( id )
-    {
-        return this.getModeById( Modes.SessionModes, id );
-    }
-
-    this.getCurrentSessionMode = function()
-    {
-        return this._getModeByIndex(Modes.SessionModes, this.params.session.value);
-    }
-
-    this.setSessionMode = function( id )
-    {
-        let mode = this.getSessionMode( id );
-
-        if( mode.id == 'stepedit' || mode.id == 'eventedit' )
-        {
-            if( this.lastTrackEditorType == PreSonus.HostUtils.kEditorTypePattern )
-            {
-                index = this.getSessionMode('stepedit').index;
-            } else {
-                index = this.getSessionMode('eventedit').index;
-            }
-            this.params.session.setValue( index, true );
-            Host.GUI.Commands.deferCommand("View", "Editor", false, Host.Attributes(["State", true]));
-            return;
+    this.getSessionMode = function(id) {  //updated to use the index property
+        const index = sessionModeIdToIndexMap.get(String(id)); // Use the IndexMap to translate the id('stepedit', 'eventedit', etc) to an index. Replaces the need for getDevicePadMode
+        if (index !== undefined) {
+            return Modes.SessionModes[index];
         }
-
-        this.params.session.setValue( mode.index, true );
+        return null;
+    }
+    
+    this.getCurrentSessionMode = function() {
+        const index = this.params.session.value;
+        if (index >= 0 && index < Modes.SessionModes.length) { // Check if the index is within the bounds of the array
+            return Modes.SessionModes[index];
+        }
+        return null;
     }
 
-    this.activateSessionHandler = function()
-    {
+    /**
+     * Sets the session mode based on the provided ID.
+     * 
+     * @param {string} id - The ID of the session mode to set.
+     */
+    this.setSessionMode = function(id) {
+        // Retrieve the session mode object based on the provided ID
+        let mode = this.getSessionMode(id); 
+
+        // Check if the mode is 'stepedit' or 'eventedit'
+        if (mode.id === 'stepedit' || mode.id === 'eventedit') {
+            // Determine the index based on the last track editor type
+            let index = (this.lastTrackEditorType === PreSonus.HostUtils.kEditorTypePattern) 
+                        ? this.getSessionMode('stepedit').index 
+                        : this.getSessionMode('eventedit').index;
+
+            // Set the session value to the determined index
+            this.params.session.setValue(index, true);
+
+            // Defer the command to update the view
+            Host.GUI.Commands.deferCommand("View", "Editor", false, Host.Attributes(["State", true]));
+        } else {
+            // Set the session value for other modes
+            this.params.session.setValue(mode.index, true);
+        }
+    }
+    
+    this.activateSessionHandler = function() {
+        Host.Console.writeLine(`Activating session handler getCurrentSessionMode`);
         let mode = this.getCurrentSessionMode();
         this.sessionElement.component.setActiveHandler(mode.index);
-        this.userDefinedElement.component.suspendProcessing( mode.id != 'setup' );
+        this.userDefinedElement.component.suspendProcessing(mode.id != 'setup');
+    }
+    this.toggleNextSessionMode = function() {
+        Host.Console.writeLine(`Toggling next session mode getCurrentSessionMode`);
+        let currentMode = this.getCurrentSessionMode();
+        let nextMode = currentMode.nextMode;
+    
+        // Skip 'loopedit' mode because we are only supposed to enter it via scenehold + play button
+        if (nextMode.id === 'loopedit') {
+            nextMode = nextMode.nextMode;
+        }
+    
+        this.setSessionMode(nextMode.id);
+    }
+    
+    // Drum Mode Functions
+    this.isDrumMode = function() { 
+        // Access the .id property of the object returned by getCurrentDevicePadMode()
+        const currentMode = this.getCurrentDevicePadMode();
+        // Host.Console.writeLine(`isDrumMode: Current device pad mode: ${currentMode.id} result: ${currentMode.id === 'drum'}`);
+        return currentMode.id === 'drum';
+    }
+    
+    this.getDrumMode = function(id) {
+        // Host.Console.writeLine(`getDrumMode: Getting drum mode: ${id}`);
+        return Modes.DrumModes.find(mode => mode.id === id);
     }
 
-    this.toggleNextSessionMode = function()
-    {
-        let indexFrom = this.params.session.value;
-        if( indexFrom == 0 )
-            indexFrom = 1;
-
-        let mode = this.getNextMode( Modes.SessionModes, indexFrom, true );
-        this.setSessionMode( mode.id );
+    this.getCurrentDrumMode = function() {
+        // Assuming this.params.drum.value holds the index of the current drum mode
+        const modeIndex = this.params.drum.value;
+        return Modes.DrumModes.find(mode => mode.index === modeIndex);
     }
 
-    this.isDrumMode = function()
-    {
-        Host.Console.writeLine("isDrumMode: this.getCurrentDevicePadMode().id" + this.getCurrentDevicePadMode().id);
-        return this.getCurrentDevicePadMode().id == 'drum';
+    this.setDrumMode = function(id) {
+        const modeIndex = this.getDrumMode(id).index;
+        // Host.Console.writeLine(`setDrumMode: Setting drum mode: ${id} index=${modeIndex}`);
+        if (modeIndex !== undefined) {
+            this.params.drum.setValue(modeIndex, true);
+        } else {
+            Host.Console.writeLine(`setDrumMode: Error: Mode with ID ${id} not found.`);
+            return null;
+        }
     }
-
-    this.getDrumMode = function( id )
-    {
-        Host.Console.writeLine("Getting drum mode " + id);
-        return this.getModeById( Modes.DrumModes, id );
-    }
-
-    this.getCurrentDrumMode = function()
-    {
-        Host.Console.writeLine("Getting current drum mode (this.params.drum.value) " + this.params.drum.value);
-        return this._getModeByIndex(Modes.DrumModes, this.params.drum.value);
-    }
-
-    this.setDrumMode = function( id )
-    {
-        let index = this.getDrumMode( id ).index;
-        this.params.drum.setValue( index, true );
-        Host.Console.writeLine("Setting drum mode " + id + " with index " + index);
-    }
-
+    
     this.activateDrumHandler = function()
     {
+        Host.Console.writeLine(`Inside activateDrumHandler`);
         this.drumElement.component.setActiveHandler(this.params.drum.value);
     }
 
     this.setPadFocusWhenPressed = function( active )
     {
+        Host.Console.writeLine(`Inside setPadFocusWhenPressed`);
         this.getDrumMode('play').handler.setFocusPadWhenPressed(active);
     }
-
-    this.getHuiMode = function( id )
-    {
-        return this.getModeById( Modes.HuiModes, id );
+    
+    // Hui Mode Functions
+    this.getHuiMode = function(id) {
+        // Use the preprocessed map to get the index of the mode by ID
+        const modeIndex = huiModeIdToIndexMap.get(String(id));
+        Host.Console.writeLine(`getHuiMode: Getting Hui mode: ${id} index=${modeIndex}`);
+        // Return the mode from Modes.HuiModes using the index
+        return Modes.HuiModes[modeIndex];
     }
 
-    this.getCurrentHuiMode = function()
-    {
-        return this._getModeByIndex(Modes.HuiModes, this.params.hui.value);
+    this.getCurrentHuiMode = function() {
+        // Access the current Hui mode based on this.params.hui.value
+        const modeIndex = this.params.hui.value;
+        if (modeIndex >= 0 && modeIndex < Modes.HuiModes.length) {
+            Host.Console.writeLine(`getCurrentHuiMode: Getting current Hui mode: ${modeIndex}`);
+            return Modes.HuiModes[modeIndex];
+        }
+        return null;
     }
 
-    this.setHuiMode = function( id )
-    {
-        let index = this.getHuiMode( id ).index;
-        this.params.hui.setValue( index, true );
+    this.setHuiMode = function(id) {
+        const modeIndex = this.getHuiMode(id).index;
+        Host.Console.writeLine(`setHuiMode: Setting Hui mode: ${id} index=${modeIndex}`);
+        if (modeIndex !== undefined) {
+            this.params.hui.setValue(modeIndex, true);
+        } else {
+            Host.Console.writeLine(`setHuiMode: Error: Mode with ID ${id} not found.`);
+            return null;
+        }
     }
-
-    this.toggleNextHuiMode = function()
-    {
-        let mode = this.getNextMode( Modes.HuiModes, this.params.hui.value );
-        this.setHuiMode( mode.id );
+    this.toggleNextHuiMode = function() {
+        // Get the current Hui mode
+        Host.Console.writeLine(`Inside toggleNextHuiMode`);
+        const currentMode = this.getCurrentHuiMode();
+        // Set the Hui mode to the next mode using the nextMode property
+        this.setHuiMode(currentMode.nextMode.id);
     }
-
+    // Other Functions
     this.setModifierActive = function(active)
     {
+        Host.Console.writeLine(`Inside setModifierActive`);
         this.drumElement.component.setModifierActive(active);
         this.sessionElement.component.setModifierActive(active);
     }
 
-    this.setFullVelocityMode = function(active)
+    this.setDrumFullVelocityMode = function(active)
+    // The original function name was setFullVelocityMode but this is a native method of Presonus.component.
+    // so to avoide collisions renamed to setDrumFullVelocityMode here and in LaunchKeyMKIIIComponent
     {
+        Host.Console.writeLine(`Inside setDrumFullVelocityMode`);
         this.drumElement.component.setFullVelocityMode(active)
     }
 
-    this.setCurrentBank = function(bank)
+    this.setDrumSessionCurrentBank = function(bank)
     {
+        Host.Console.writeLine(`Inside setCurrentBank`);
         this.drumElement.component.setCurrentBank(bank);
         this.sessionElement.component.setCurrentBank(bank);
     }
 
     this.setPadDisplayMode = function( mode )
     {
+        Host.Console.writeLine(`Inside setPadDisplayMode`);
         let modes = [
             PreSonus.MusicPadDisplayMode.kNoColors,
             PreSonus.MusicPadDisplayMode.kDimmedColors,
@@ -687,9 +856,13 @@ function Modes( hostComponent, bankCount )
 
     this.toggleNextPadDisplayMode = function()
     {
+        Host.Console.writeLine(`Inside toggleNextPadDisplayMode`);
         let nextMode = this.params.display.value + 1;
         if( nextMode > 2 )
             nextMode = 0;
         this.setPadDisplayMode(nextMode);
+        Host.Console.writeLine(`toggleNextPadDisplayMode: nextMode: ${nextMode}`);
     }
+
 }
+

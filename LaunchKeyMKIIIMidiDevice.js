@@ -23,14 +23,15 @@ class ColorLEDHandler extends PreSonus.ControlHandler {
         this.status = status;
         this.address = address;
         this.effect = 0;
-        this.state = 1; // Default state is on so the SSM and Scene buttons can be lit up since they don't have a state.
+        this.state = status > 169 ? 1 : 0; // Set default state based on status so the SSM and Scene buttons can be lit up since they don't have a state..
         this.color = new Color(0);  // Default color is black
         this.value = 0;
         this.debugLog = true;
+        //this.log(`ColorLEDHandler: ${name} Status: ${status} Address: ${address}`);
     }
 
     setState(_state) {
-        //this.log(`setState received: ${_state}`);
+        //this.log(`setState received: Current state: ${this.state}  New state: ${_state}`);
         if (this.state !== _state) { // Added a check to update only if the state has changed.
             this.state = _state;
             this.update();
@@ -38,7 +39,7 @@ class ColorLEDHandler extends PreSonus.ControlHandler {
     }
 
     setEffect(_effect) {
-        //this.log(`setEffect received: ${_effect}`);
+        //this.log(`setEffect received: Current effect: ${this.effect}  New effect: ${_effect}`);
         if (this.effect !== _effect) { // Added a check to update only if the effect has changed.
             this.effect = _effect; // moved the sendMidi call to the update method for fewer calls.
             this.update();
@@ -46,9 +47,17 @@ class ColorLEDHandler extends PreSonus.ControlHandler {
     }
 
     sendValue(_value, _flags) {
-        //this.log(`sendValue received: ${_value}`);
-        if (!this.color.equals(new Color(_value))) { // added a .equals method to the Color class
-            const newColor = new Color(_value);
+        const newColor = new Color(_value);
+        //this.log(`sendValue received: Current color: ${this.value}  New color: ${_value} New color object: ${newColor}`);
+
+        // Check if the new color is black and the current color is also black
+        if (_value === -16777216 && this.value === 0) {
+            this.log('Color update skipped. Both colors are black.');
+            return;
+        }
+        
+        // Check if the new color is different from the current color
+        if (!this.color.equals(newColor)) {
             // this.log(`Setting color: ${newColor}`);
             this.color = newColor;
             this.value = this.color.midi;
@@ -58,7 +67,13 @@ class ColorLEDHandler extends PreSonus.ControlHandler {
     }
 
     update() {
-        const midi = this.state ? this.value : 0x00;
+        // Check if the state is 0 and return early if true
+        if (this.state === 0) {
+            this.log('State is 0, no MIDI message will be sent.');
+            return;
+        }
+    
+        const midi = this.value;
         this.log(`Sending MIDI: ${this.status | this.effect}, ${this.address}, ${midi}`);
         this.sendMidi(this.status | this.effect, this.address, midi);
     }

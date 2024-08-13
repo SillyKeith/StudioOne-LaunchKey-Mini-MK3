@@ -6,33 +6,42 @@ const Effect = {
     PULSE: 2
 };
 
-function Channel() {
-    // Log the properties of the Channel instance
-    logObjectProperties(this);
-       
-    this.connectPot = function(element, paramName) {
+class Channel {
+    constructor() {
+        this.channelElement = null;
+        this.potValue = null;
+        this.padSelect = null;
+        this.padSelectColor = null;
+        this.padToggle = null;
+        this.padToggleColor = null;
+        this.padToggleEffect = null;
+        this.padSelectEffect = null;
+        this.genericElement = null;
+        this.padGeneric = false;
+        this.potGeneric = false;
+    }
+
+    connectPot(element, paramName) {
         if (!paramName) {
             paramName = element;
             element = this.channelElement;
         }
-        logObjectProperties(element);
-        logObjectProperties(this.potValue);
         return element.connectAliasParam(this.potValue, paramName);
     }
 
-    this.connectSelect = function(paramName) {
+    connectSelect(paramName) {
         Host.Console.writeLine(`Inside connectSelect`);
         return this.channelElement.connectAliasParam(this.padSelect, paramName);
     }
 
-    this.connectSelectColor = function(paramName) {
+    connectSelectColor(paramName) {
         Host.Console.writeLine(`Inside connectSelectColor`);
         return this.channelElement.connectAliasParam(this.padSelectColor, paramName);
     }
 
-    this.connectToggle = function(element, paramName) {
+    connectToggle(element, paramName) {
         if (!paramName) {
-            Host.Console.writeLine(`Channel class connectToggle: No paramName provided, setting paramName to element ${element}`); // Log the element
+            Host.Console.writeLine(`Channel class connectToggle: No paramName provided, setting paramName to element ${element}`);
             paramName = element;
             element = this.channelElement;
         }
@@ -41,7 +50,7 @@ function Channel() {
         return element.connectAliasParam(this.padToggle, paramName);
     }
 
-    this.updateSelectEffect = function() {
+    updateSelectEffect() {
         Host.Console.writeLine(`Inside updateSelectEffect`);
         if (this.channelElement.getParamValue('selected'))
             return this.padSelectEffect.setValue(Effect.PULSE);
@@ -49,10 +58,9 @@ function Channel() {
         this.padSelectEffect.setValue(Effect.NONE);
     }
 
-    this.updateToggle = function(color_off, color_on, effect) {
+    updateToggle(color_off, color_on, effect) {
         Host.Console.writeLine(`updateToggle - this.padToggle: ${this.padToggle.value}`);
-        if (this.padToggle.value === null || this.padToggle.value === undefined) { // Check if the value is null or undefined
-            //this.padToggle.setValue(0); // to handle undefined values.
+        if (this.padToggle.value === null || this.padToggle.value === undefined) {
             this.padToggleColor.setValue(0);
             this.padToggleEffect.setValue(Effect.NONE);
             return;
@@ -68,39 +76,31 @@ function Channel() {
         }
     }
 
-    /**
-     * Checks if the pad is set to generic.
-     * @returns {boolean} - True if the pad is generic, false otherwise.
-     */
-    this.isPadGeneric = function () {
+    isPadGeneric() {
         return this.padGeneric;
     }
 
-    /**
-     * Checks if the pot is set to generic.
-     * @returns {boolean} - True if the pot is generic, false otherwise.
-     */
-    this.isPotGeneric = function () {
+    isPotGeneric() {
         return this.potGeneric;
     }
 
-    this.setPotGeneric = function() {
+    setPotGeneric() {
         this.genericElement.connectAliasParam(this.potValue, 'value');
         this.padGeneric = true;
     }
 
-    this.setToggleGeneric = function() {
+    setToggleGeneric() {
         Host.Console.writeLine(`Inside setToggleGeneric`);
         this.genericElement.connectAliasParam(this.padToggle, 'value');
     }
 
-    this.setSelectGeneric = function() {
+    setSelectGeneric() {
         Host.Console.writeLine(`Inside setSelectGeneric`);
         this.genericElement.connectAliasParam(this.padSelect, 'value');
         this.genericElement.connectAliasParam(this.padSelectColor, 'value');
     }
 
-    this.setPadGeneric = function() {
+    setPadGeneric() {
         Host.Console.writeLine(`Inside setPadGeneric`);
         this.setToggleGeneric();
         this.setSelectGeneric();
@@ -127,7 +127,7 @@ function PadMode() {
         }
         
         this.renderHandlers.push(func.bind(this));
-        Host.Console.writeLine(`Added new render handler for ${this.id}, new length: ${this.renderHandlers.length}`);
+        Host.Console.writeLine(`Added new render handler for ${this.id}`);
     }
 
     this.render = function(host, root) {
@@ -361,10 +361,10 @@ function Modes(hostComponent, bankCount) {
             let channel = new Channel();
 
             channel.genericElement = root.getGenericMapping().getElement(0).find ("knob[" + i + "]");
-            channel.channelElement = channelBankElement.getElement(i);
-            channel.sendsBankElement = channel.channelElement.find("SendsBankElement");
+            channel.channelElement = channelBankElement.getElement(i); 
+            channel.sendsBankElement = channel.channelElement.find("SendsBankElement"); // for SendA and SendB found in surface.xml
             
-            channel.potValue = paramList.addAlias("potValue" + i);
+            channel.potValue = paramList.addAlias("potValue" + i); // vpots
 
             channel.padSelect = paramList.addAlias("padSelectValue" + i);
             channel.padSelectColor = paramList.addAlias("padSelectColorValue" + i);
@@ -483,7 +483,7 @@ function Modes(hostComponent, bankCount) {
         });
 
         Host.Console.writeLine("Setting up session modes ");
-        Host.Console.writeLine("sessionModeIdToIndexMap length " + sessionModeIdToIndexMap.size);
+        // Host.Console.writeLine("sessionModeIdToIndexMap length " + sessionModeIdToIndexMap.size);
         Modes.SessionModes.forEach((mode, index) => { 
             switch(mode.id)
             {
@@ -575,11 +575,12 @@ function Modes(hostComponent, bankCount) {
                         });
                     } break;
                 default:
-                    Host.Console.writeLine(`Setting up default mode and adding null handler for id: ${mode.id} index: ${mode.index}`);
-                    padComponent.addNullHandler();
+                    // Host.Console.writeLine(`Setting up default mode and adding null handler for id: ${mode.id} index: ${mode.index}`);
+                    padComponent.addNullHandler(); // Add a null handler for the default case which is SessionMode 'hui' index 4
                     break;
             }
             // Global Initiations For Session Modes
+            Host.Console.writeLine(`Global Initiations For Session Modes ${mode.id} with index ${mode.index}`);
             mode.init(index, padComponent);
             mode.addActiveRenderHandler( function(host, root) {
                 Host.Console.writeLine(`Setting active render handler for ${mode.id}`);

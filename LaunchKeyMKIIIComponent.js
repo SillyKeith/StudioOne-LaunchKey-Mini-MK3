@@ -21,6 +21,11 @@ include_file("Color.js");
 include_file("Modes.js");
 
 class LaunchKeyMK3ExtendedComponent extends PreSonus.ControlSurfaceComponent {
+    constructor() {
+        super();
+        this.channelsUpdated = false; // Initialize the flag
+    }
+
     onInit(hostComponent) {
         super.onInit(hostComponent);
         this.debugLog = true;  // Set to true to enable debug logging
@@ -54,6 +59,7 @@ class LaunchKeyMK3ExtendedComponent extends PreSonus.ControlSurfaceComponent {
         this.repeatQuantizeAlias = paramList.addAlias("repeatQuantize");
         this.editorModeActive = paramList.addParam("editorModeActive");
         this.bankMenuColor = paramList.addColor("bankButtonColor");
+        this.modes.lastTrackEditorType = PreSonus.HostUtils.kEditorTypeNone; // set to none initially
         this.updateBankMenuColor();
 
         // Additional setup
@@ -106,14 +112,20 @@ class LaunchKeyMK3ExtendedComponent extends PreSonus.ControlSurfaceComponent {
         paramList.addInteger(2, 2, "EFFECT_PULSE");
     }
 
-    updateBankMenuColor = function() {
-        let c = this.padSessionSection.component;
-        let d = this.padDrumSection.component;
-        let bankIndex = c.getCurrentBank();
-        let bankColor = Color.Bank[bankIndex];
-        bankIndex = d.getCurrentBank();
-        bankColor = Color.Bank[bankIndex];
-        this.bankMenuColor.fromString(bankColor);
+    updateBankMenuColor = function() {  // Since Drum Layout and Session Layout have different bank colors, this function is used to update the bank color based on the current mode.
+        let bankIndex, bankColor;
+    
+        if (this.modes.isSessionMode()) { // If the current mode is session, then the bank color is based on the session section.
+            let c = this.padSessionSection.component;
+            bankIndex = c.getCurrentBank();
+            bankColor = Color.Bank[bankIndex];
+            this.bankMenuColor.fromString(bankColor);
+        } else if (this.modes.isDrumMode()) {  // If the current mode is drum, then the bank color is based on the drum section.
+            let d = this.padDrumSection.component;
+            bankIndex = d.getCurrentBank();
+            bankColor = Color.Bank[bankIndex];
+            this.bankMenuColor.fromString(bankColor);
+        }
     }
 
     // Using this as the Initiation
@@ -131,25 +143,37 @@ class LaunchKeyMK3ExtendedComponent extends PreSonus.ControlSurfaceComponent {
         this.renderDrumMode();
         this.renderSessionMode();
     }
+    
+    onExit () {
+        Host.Signals.unadvise(this.padSessionSection.component, this);
+        Host.Signals.unadvise(this.padDrumSection.component, this);
+        //this.modes.setDevicePadMode('drum');
+        PreSonus.HostUtils.enableEngineEditNotifications(this, false);
+        PreSonus.HostUtils.enableEditorNotifications(this, false); // disconnect from both since we enable both
+        super.onExit();   //PreSonus.ControlSurfaceComponent.prototype.onExit.call(this);
+    }
 
     paramChanged = function (param) {
         Host.Signals.signal("LaunchKeyMK3", 'paramChanged', param); // This allows the BASIC component to receive signals.
-        if(!param)
+        if (!param)
             return;
         this.log("LaunchkeyComponent.js paramChanged value changed to " + param.value);
         switch (param) {
             case this.modes.params.device_pad:
                 this.log(`Entered device_pad case with value: ${param.value}`);
+                this.resetChannelsUpdatedFlag(); // Reset flag
                 this.renderDrumMode();
                 this.renderSessionMode();
                 break;
     
             case this.modes.params.device_pot:
                 this.log(`Entered device_pot case with value: ${param.value}`);
+                this.resetChannelsUpdatedFlag(); // Reset flag
                 return this.updateChannels();
     
             case this.sceneHold:
                 this.log(`Entered sceneHold case with value: ${param.value}`);
+                // this.resetChannelsUpdatedFlag(); // Reset flag
                 return this.modes.setModifierActive(param.value);
     
             case this.modes.params.focus:
@@ -158,19 +182,23 @@ class LaunchKeyMK3ExtendedComponent extends PreSonus.ControlSurfaceComponent {
     
             case this.modes.params.drum:
                 this.log(`Entered drum case with value: ${param.value}`);
+                this.resetChannelsUpdatedFlag(); // Reset flag
                 return this.renderDrumMode();
     
             case this.modes.params.session:
                 this.log(`Entered session case with value: ${param.value}`);
+                this.resetChannelsUpdatedFlag(); // Reset flag
                 return this.renderSessionMode();
     
             case this.modes.params.hui:
                 this.log(`Entered hui case with value: ${param.value}`);
+                this.resetChannelsUpdatedFlag(); // Reset flag
                 return this.renderHuiMode();
     
             case this.fullVelocityMode:
                 this.log(`Entered fullVelocityMode case with value: ${param.value}`);
                 // setFullVelocityMode is a native method so renaming the function in the Modes.js file to setDrumFullVelocityMode
+                // this.resetChannelsUpdatedFlag(); // Reset flag
                 return this.modes.setDrumFullVelocityMode(param.value);
     
             case this.bankMenu:
@@ -182,7 +210,6 @@ class LaunchKeyMK3ExtendedComponent extends PreSonus.ControlSurfaceComponent {
                 this.channelBankElement.selectBank(this.bankList.string);
                 this.onHuiScrollOptions(this.sceneHold.value);
                 return;
-    
         }
     }
 
@@ -212,7 +239,7 @@ class LaunchKeyMK3ExtendedComponent extends PreSonus.ControlSurfaceComponent {
      * Known params Editor|Console|Browser|TransportPanel
      * @param  {bool}   state     Whether button is down or up
      */
-    onToggleWindow = function (state) {
+    onToggleWindow = function (state) {  // This function is also called by the surface.xml elements
         if (!state)
             return;
         this.log("Inside onToggleWindow");
@@ -241,7 +268,7 @@ class LaunchKeyMK3ExtendedComponent extends PreSonus.ControlSurfaceComponent {
         }
     }
 
-    openEditorAndFocus = function (state) {
+    openEditorAndFocus = function (state) { // This function is also called by the surface.xml elements by the ssm button when in Session Mode plus shiftModifier
         if (!state)
             return;
         this.log("Inside openEditorAndFocus");
@@ -261,7 +288,7 @@ class LaunchKeyMK3ExtendedComponent extends PreSonus.ControlSurfaceComponent {
         this.modes.setSessionMode('loopedit');
     }
 
-    onHuiModePressed = function (state) {
+    onHuiModePressed = function (state) { // This function is also called by the surface.xml elements by the sceneHold and ssm button
         if (!state)
             return;
         this.log("Inside onHuiModePressed");
@@ -307,8 +334,10 @@ class LaunchKeyMK3ExtendedComponent extends PreSonus.ControlSurfaceComponent {
     onActivateNoteRepeat = function (value) {
         this.log("inside onActivateNoteRepeat");
         if (value) {
-            if (this.noteRepeatElement.getParamValue(PreSonus.NoteRepeat.kSpread))
+            if (this.noteRepeatElement.getParamValue(PreSonus.NoteRepeat.kSpread)){
                 this.modes.setDrumMode('rate_trigger');
+                this.resetChannelsUpdatedFlag(); // Reset Channel Update flag
+            }
 
         } else if (this.modes.getCurrentDrumMode().id == 'rate_trigger') {
             this.modes.setDrumMode('play');
@@ -366,24 +395,32 @@ class LaunchKeyMK3ExtendedComponent extends PreSonus.ControlSurfaceComponent {
         const isDrumModeActive = this.modes.isDrumMode();
         this.log(`Checking if drum mode is active: ${isDrumModeActive}`);
         if (isDrumModeActive) {
+            
             this.log(`Drum mode is active, rendering ${currentDrumMode.id}`);
-            currentDrumMode.activeRender(this, this.model.root);
-    
+            currentDrumMode.activeRender(this, this.model.root);    
+            
             const noteRepeatActive = this.noteRepeatElement.getParamValue(PreSonus.NoteRepeat.kActive);
-            this.log(`Note repeat active status: ${noteRepeatActive}`);
-            this.modes.params.scene_button.color.fromString(noteRepeatActive ? '#0000FF' : '#000000');
-    
+            this.log(`Note repeat active status: ${noteRepeatActive}`);            
+            if (noteRepeatActive) {
+                this.modes.params.scene_button.color.fromString('#0000FF');
+                this.resetChannelsUpdatedFlag(); // Reset Channels Update flag to render knobs
+            }
+                
             this.log("Setting ssm_button effect to PULSE");
             this.modes.params.ssm_button.effect.setValue(Effect.PULSE);
     
             const fullVelocityModeActive = this.fullVelocityMode.value;
             this.log(`Checking full velocity mode: ${fullVelocityModeActive}`);
-            this.modes.params.ssm_button.color.fromString(fullVelocityModeActive ? 'purple' : 'black');
+            if (fullVelocityModeActive) {
+                this.modes.params.ssm_button.color.fromString('purple');
+            }
+            else {
+                this.modes.params.ssm_button.color.setValue(0);
+            }
         }
     
         this.log("Updating channels");
-        this.updateChannels();
-    
+        this.updateChannels();    
         this.log("Exiting renderDrumMode");
     }
 
@@ -429,7 +466,7 @@ class LaunchKeyMK3ExtendedComponent extends PreSonus.ControlSurfaceComponent {
         this.modes.params.ssm_button.color.fromString(hui.color);
     }
 
-    onHuiScrollOptions = function (state) {
+    onHuiScrollOptions = function (state) {  // This function is also called by the surface.xml elements by the sceneHold button
         this.log ("onHuiScrollOptions - state: " + state);
         let mode = this.modes.getCurrentSessionMode();
         if (state) {
@@ -457,6 +494,12 @@ class LaunchKeyMK3ExtendedComponent extends PreSonus.ControlSurfaceComponent {
      */
     updateChannels = function () {
         this.log("Entering updateChannels");
+
+        // Check if channels have already been updated
+        if (this.channelsUpdated) {
+            this.log("Channels have already been updated, skipping update");
+            return;
+        }
 
         // Reset all pots to generic if not already set
         // Wondering what happens with this is not called
@@ -506,6 +549,8 @@ class LaunchKeyMK3ExtendedComponent extends PreSonus.ControlSurfaceComponent {
                     break;
             }
         }
+        
+        this.channelsUpdated = true; // Set the flag to true after updating channels to prevent multiple updates
 
         this.log("Exiting updateChannels");
     }
@@ -559,25 +604,20 @@ class LaunchKeyMK3ExtendedComponent extends PreSonus.ControlSurfaceComponent {
         channel.updateToggle(huiMode.toggleColor[0], huiMode.toggleColor[1], huiMode.effect);
     }
 
-        notify = function (subject, msg) {
-            if(!subject || !msg)
-                return;
-            this.log(`Component.js notify function ${subject}: ${msg.id}`);
-            if (msg.id == PreSonus.HostUtils.kTrackEditorChanged)
-                this.onTrackEditorChanged(msg.getArg(0));
+    resetChannelsUpdatedFlag = function () {
+        this.channelsUpdated = false;
+    }
 
-            else if (msg.id == PreSonus.PadSection.kCurrentBankChanged)
-                this.updateBankMenuColor();
-        }
+    notify = function (subject, msg) {
+        if(!subject || !msg)
+            return;
+        this.log(`Component.js notify function ${subject}: ${msg.id}`);
+        if (msg.id == PreSonus.HostUtils.kTrackEditorChanged)
+            this.onTrackEditorChanged(msg.getArg(0));
 
-        onExit () {
-            Host.Signals.unadvise(this.padSessionSection.component, this);
-            Host.Signals.unadvise(this.padDrumSection.component, this);
-            //this.modes.setDevicePadMode('drum');
-            PreSonus.HostUtils.enableEngineEditNotifications(this, false);
-            PreSonus.HostUtils.enableEditorNotifications(this, false); // disconnect from both since we enable both
-            super.onExit();   //PreSonus.ControlSurfaceComponent.prototype.onExit.call(this);
-        }
+        else if (msg.id == PreSonus.PadSection.kCurrentBankChanged)
+            this.updateBankMenuColor();
+    }
 }
 
 // factory entry called by host

@@ -347,7 +347,7 @@
         <DeviceMapping device="WindowManager" name="WindowManagerElement">
             <Variant control="sceneHold">
                 <Null />
-                <Invoke control="ssm" onReceive="onToggleWindow" />
+                <Invoke control="ssm" onReceive="onToggleWindow" />  <!-- This calls the same named function in the component script -->
             </Variant>
         </DeviceMapping>
 
@@ -365,7 +365,7 @@
             <ScrollBank target="RemoteBank" pagesize="8" name="RemoteBankElement">
                 <!-- The Channel Strips -->
                 <foreach variable="$channel" count="8">
-                    <Strip onConnect="updateChannel($channel)">
+                    <Strip onConnect="updateChannel($channel)"> <!-- calls updateChannel function in the component script -->
                         <ParamInvoke param="selected" onChanged="updateChannel($channel)" />
                         <ParamInvoke param="monitor" onChanged="updateChannel($channel)" />
                         <ParamInvoke param="recordArm" onChanged="updateChannel($channel)" />
@@ -470,13 +470,13 @@
                 </Group>
 
                 <Group value="$DEVICE_PAD_MODE_DRUM">
-                    <ParamInvoke param="fullVelocityMode" onChanged="renderDrumMode" />
+                    <ParamInvoke param="fullVelocityMode" onChanged="renderDrumMode" /> <!-- This calls the same named function in the component script -->
                     <Variant control="sceneHold">
-                        <Toggle control="ssm" param="fullVelocityMode" />
+                        <Toggle control="ssm" param="fullVelocityMode" /> 
                         <Null />
                     </Variant>
 
-                    <Invoke control="f_chord" onReceive="togglePadDisplayMode" />
+                    <Invoke control="f_chord" onReceive="togglePadDisplayMode" /> <!-- This calls the same named function in the component script -->
                     <ParamVariant param="padDisplayMode">
                         <PlainValue control="f_chordLED" param="MONO_OFF" />
                         <PlainValue control="f_chordLED" param="MONO_HALF" />

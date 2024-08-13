@@ -23,7 +23,7 @@ class ColorLEDHandler extends PreSonus.ControlHandler {
         this.status = status;
         this.address = address;
         this.effect = 0;
-        this.state = 0;
+        this.state = 1; // Default state is on so the SSM and Scene buttons can be lit up since they don't have a state.
         this.color = new Color(0);  // Default color is black
         this.value = 0;
         this.debugLog = true;
@@ -49,9 +49,10 @@ class ColorLEDHandler extends PreSonus.ControlHandler {
         //this.log(`sendValue received: ${_value}`);
         if (!this.color.equals(new Color(_value))) { // added a .equals method to the Color class
             const newColor = new Color(_value);
-            this.log(`Setting color: ${newColor}`);
+            // this.log(`Setting color: ${newColor}`);
             this.color = newColor;
             this.value = this.color.midi;
+            this.log(`Midi color value: ${this.value}`);
             this.update();
         }
     }
@@ -81,10 +82,12 @@ class ColorStateHandler extends PreSonus.ControlHandler {
         this.name = name;
         this.handler = handler;
         this.handler.setState(0);
+        this.debugLog = true;
     }
 
     sendValue(value, flags) {
         this.handler.setState(value);
+        // this.log(`Handler: ${this.handler.name} State: ${value}`);
     }
 }
 
@@ -98,7 +101,7 @@ class MonoLEDHandler extends PreSonus.ControlHandler {
 
     sendValue(_value, _flags) {
         this.value = (_value === undefined) ? 0 : _value; // Added a undefined check to set the value to 0 if undefined.
-        this.log(`MonoLEDHandler: Sending MIDI: 0xBF, ${this.address}, ${this.value}`);
+        //this.log(`MonoLEDHandler: Sending MIDI: 0xBF, ${this.address}, ${this.value}`);
         this.sendMidi(0xBF, this.address, this.value);
     }
 }
@@ -192,25 +195,6 @@ class LaunchKeyMK3ExtendedMidiDevice extends PreSonus.ControlSurfaceDevice {
     onInit(hostDevice) {
         super.onInit(hostDevice);
         this.log(`Inside onInit Midi Extended`);
-        
-        // Log what methods and properties are available on the host device
-        //const presonusComponent = this.hostDevice;
-        //this.log(`Component Type: ${presonusComponent.constructor.name}`);
-        //this.log(`Component Properties: ${JSON.stringify(presonusComponent, null, 2)}`);
-        //this.log(`Component Prototype Methods: ${Object.getOwnPropertyNames(Object.getPrototypeOf(presonusComponent))}`);
-
-        // Inspect each prototype method
-        //const prototypeMethods = Object.getOwnPropertyNames(Object.getPrototypeOf(presonusComponent));
-        //prototypeMethods.forEach(method => {
-        //    if (typeof presonusComponent[method] === 'function') {
-        //        this.log(`Method: ${method}`);
-        //        try {
-        //            this.log(`Method Details: ${presonusComponent[method].toString()}`);
-        //        } catch (e) {
-        //            this.log(`Method Details: [native code]`);
-        //        }
-        //    }
-        //});
     }
 
     createHandler(name, attributes) {

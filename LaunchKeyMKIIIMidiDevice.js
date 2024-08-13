@@ -52,7 +52,7 @@ class ColorLEDHandler extends PreSonus.ControlHandler {
 
         // Check if the new color is black and the current color is also black
         if (_value === -16777216 && this.value === 0) {
-            this.log('Color update skipped. Both colors are black.');
+            // this.log('Color update skipped. Both colors are black.');
             return;
         }
         
@@ -61,7 +61,7 @@ class ColorLEDHandler extends PreSonus.ControlHandler {
             // this.log(`Setting color: ${newColor}`);
             this.color = newColor;
             this.value = this.color.midi;
-            this.log(`Midi color value: ${this.value}`);
+            // this.log(`Midi color value: ${this.value}`);
             this.update();
         }
     }
@@ -69,12 +69,12 @@ class ColorLEDHandler extends PreSonus.ControlHandler {
     update() {
         // Check if the state is 0 and return early if true
         if (this.state === 0) {
-            this.log('State is 0, no MIDI message will be sent.');
+            // this.log('State is 0, no MIDI message will be sent.');
             return;
         }
     
         const midi = this.value;
-        this.log(`Sending MIDI: ${this.status | this.effect}, ${this.address}, ${midi}`);
+        // this.log(`Sending MIDI: ${this.status | this.effect}, ${this.address}, ${midi}`);
         this.sendMidi(this.status | this.effect, this.address, midi);
     }
 }

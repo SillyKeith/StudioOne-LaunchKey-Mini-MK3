@@ -68,10 +68,10 @@ class ColorLEDHandler extends PreSonus.ControlHandler {
 
     update() {
         // Check if the state is 0 and return early if true
-        if (this.state === 0) {
-            this.log('State is 0, no MIDI message will be sent.');
-            return;
-        }
+        //if (this.state === 0) {
+        //    this.log('State is 0, no MIDI message will be sent.');
+        //    return;
+        //}
     
         const midi = this.value;
         this.log(`Sending MIDI: ${this.status | this.effect}, ${this.address}, ${midi}`);

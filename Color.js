@@ -38,7 +38,8 @@ Color.References = {
     'command': '#00FFFF',
     'default_bank': '#00FFFF',
     'rate_trigger': 'orange',
-    'repeat_menu': 'blue'
+    'repeat_menu': 'blue',
+    'off': '0'
 }
 
 Color.Mono = {

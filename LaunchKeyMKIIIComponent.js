@@ -115,17 +115,19 @@ class LaunchKeyMK3ExtendedComponent extends PreSonus.ControlSurfaceComponent {
     updateBankMenuColor = function() {  // Since Drum Layout and Session Layout have different bank colors, this function is used to update the bank color based on the current mode.
         let bankIndex, bankColor;
     
-        if (this.modes.isSessionMode()) { // If the current mode is session, then the bank color is based on the session section.
+        //if (this.modes.isSessionMode()) { // If the current mode is session, then the bank color is based on the session section.
+            this.log("Inside updateBankMenuColor - padSessionSection");
             let c = this.padSessionSection.component;
             bankIndex = c.getCurrentBank();
             bankColor = Color.Bank[bankIndex];
             this.bankMenuColor.fromString(bankColor);
-        } else if (this.modes.isDrumMode()) {  // If the current mode is drum, then the bank color is based on the drum section.
+        //} else if (this.modes.isDrumMode()) {  // If the current mode is drum, then the bank color is based on the drum section.
+            this.log("Inside updateBankMenuColor - padDrumSection");
             let d = this.padDrumSection.component;
             bankIndex = d.getCurrentBank();
             bankColor = Color.Bank[bankIndex];
             this.bankMenuColor.fromString(bankColor);
-        }
+        //}
     }
 
     // Using this as the Initiation
@@ -460,9 +462,13 @@ class LaunchKeyMK3ExtendedComponent extends PreSonus.ControlSurfaceComponent {
     renderHuiMode = function () {
         this.log("Entering renderHuiMode function");
         const hui = this.modes.getCurrentHuiMode(); // changed to const vs let
-
-        for (let i = 0; i < kPadCount; i++)
-            this.padSessionSection.component.setPadState(i, 1);
+    
+        // Loop through each pad and set its state
+        //for (let i = 0; i < kPadCount; i++) {
+        //    this.padSessionSection.component.setPadState(i, 1);
+        //}
+        
+        // Set the color from the hui mode
         this.modes.params.ssm_button.color.fromString(hui.color);
     }
 

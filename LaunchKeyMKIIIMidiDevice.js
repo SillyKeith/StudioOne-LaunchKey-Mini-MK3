@@ -31,7 +31,7 @@ class ColorLEDHandler extends PreSonus.ControlHandler {
     }
 
     setState(_state) {
-        //this.log(`setState received: Current state: ${this.state}  New state: ${_state}`);
+        this.log(`setState received: Current state: ${this.state}  New state: ${_state}`);
         if (this.state !== _state) { // Added a check to update only if the state has changed.
             this.state = _state;
             this.update();
@@ -69,12 +69,12 @@ class ColorLEDHandler extends PreSonus.ControlHandler {
     update() {
         // Check if the state is 0 and return early if true
         if (this.state === 0) {
-            // this.log('State is 0, no MIDI message will be sent.');
+            this.log('State is 0, no MIDI message will be sent.');
             return;
         }
     
         const midi = this.value;
-        // this.log(`Sending MIDI: ${this.status | this.effect}, ${this.address}, ${midi}`);
+        this.log(`Sending MIDI: ${this.status | this.effect}, ${this.address}, ${midi}`);
         this.sendMidi(this.status | this.effect, this.address, midi);
     }
 }
@@ -96,12 +96,12 @@ class ColorStateHandler extends PreSonus.ControlHandler {
         super();
         this.name = name;
         this.handler = handler;
-        this.handler.setState(0);
+        this.handler.setState(1);
         this.debugLog = true;
     }
 
     sendValue(value, flags) {
-        this.handler.setState(value);
+        this.handler.setState(1); // Override the state to always be 1
         // this.log(`Handler: ${this.handler.name} State: ${value}`);
     }
 }

@@ -61,7 +61,7 @@ class Channel {
     updateToggle(color_off, color_on, effect) {
         Host.Console.writeLine(`updateToggle - this.padToggle: ${this.padToggle.value}`);
         if (this.padToggle.value === null || this.padToggle.value === undefined) {
-            this.padToggleColor.setValue(0);
+            //this.padToggleColor.setValue(0);
             this.padToggleEffect.setValue(Effect.NONE);
             return;
         }
@@ -167,7 +167,7 @@ function PadMode() {
 
     this.toggle = function(pad, value, color_off, color_on) {
         Host.Console.writeLine(`Toggling pad: ${pad}, value: ${value}`);
-        this.component.setPadState(pad, true);
+        //this.component.setPadState(pad, true);
         return this.setColor(pad, (value) ? color_on : color_off);
     }
 
@@ -850,9 +850,10 @@ function Modes(hostComponent, bankCount) {
             PreSonus.MusicPadDisplayMode.kDimmedColors,
             PreSonus.MusicPadDisplayMode.kBrightColors,
         ];
-
+        // We can no longer set the pads to kNoColors after disabling the LEDButtonState. Small price to pay for fewer midi signals.
         this.params.display.setValue( mode, true );
         this.getDrumMode('play').handler.setDisplayMode(modes[mode]);
+        Host.Console.writeLine(`setPadDisplayMode: mode: ${mode} for modes: ${modes[mode]}`);
     }
 
     this.toggleNextPadDisplayMode = function()

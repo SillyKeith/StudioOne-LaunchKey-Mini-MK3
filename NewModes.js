@@ -636,26 +636,24 @@ class Modes extends PreSonus.ControlSurfaceComponent {
         this.sessionElement.component.setCurrentBank(bank);
     }
 
-    setPadDisplayMode(mode)
-    {
-        Host.Console.writeLine(`Inside setPadDisplayMode`);
+    // Consolidated the SetDisplayMode and toggleNextPadDisplayMode functions into one function
+    // Also removed array creation since PreSonus.MusicPadDisplayMode exists in the PreSonus namespace
+    toggleNextPadDisplayMode() {
+        Host.Console.writeLine(`Inside toggleNextPadDisplayMode`);
+        let nextMode = this.params.display.value + 1;
+        if (nextMode > 2) {
+            nextMode = 0;
+        }
+
+        // We can no longer set the pads to kNoColors after disabling the LEDButtonState. Small price to pay for fewer midi signals.
         const modes = [
             PreSonus.MusicPadDisplayMode.kNoColors,
             PreSonus.MusicPadDisplayMode.kDimmedColors,
             PreSonus.MusicPadDisplayMode.kBrightColors,
         ];
 
-        this.params.display.setValue( mode, true );
-        this.getDrumMode('play').handler.setDisplayMode(modes[mode]);
-    }
-
-    toggleNextPadDisplayMode()
-    {
-        Host.Console.writeLine(`Inside toggleNextPadDisplayMode`);
-        let nextMode = this.params.display.value + 1;
-        if( nextMode > 2 )
-            nextMode = 0;
-        this.setPadDisplayMode(nextMode);
+        this.params.display.setValue(nextMode, true);
+        this.getDrumMode('play').handler.setDisplayMode(modes[nextMode]);
         Host.Console.writeLine(`toggleNextPadDisplayMode: nextMode: ${nextMode}`);
     }
 

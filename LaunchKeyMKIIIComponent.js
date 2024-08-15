@@ -23,7 +23,7 @@ include_file("Modes.js");
 class LaunchKeyMK3ExtendedComponent extends PreSonus.ControlSurfaceComponent {
     constructor() {
         super();
-        this.channelsUpdated = false; // Initialize the flag
+        this.channelsUpdated = false; // Initialize the flag for keeping track of whether the channels have been updated
     }
 
     onInit(hostComponent) {
@@ -113,21 +113,18 @@ class LaunchKeyMK3ExtendedComponent extends PreSonus.ControlSurfaceComponent {
     }
 
     updateBankMenuColor = function() {  // Since Drum Layout and Session Layout have different bank colors, this function is used to update the bank color based on the current mode.
-        let bankIndex, bankColor;
-    
-        //if (this.modes.isSessionMode()) { // If the current mode is session, then the bank color is based on the session section.
-            this.log("Inside updateBankMenuColor - padSessionSection");
-            let c = this.padSessionSection.component;
-            bankIndex = c.getCurrentBank();
-            bankColor = Color.Bank[bankIndex];
-            this.bankMenuColor.fromString(bankColor);
-        //} else if (this.modes.isDrumMode()) {  // If the current mode is drum, then the bank color is based on the drum section.
-            this.log("Inside updateBankMenuColor - padDrumSection");
-            let d = this.padDrumSection.component;
-            bankIndex = d.getCurrentBank();
-            bankColor = Color.Bank[bankIndex];
-            this.bankMenuColor.fromString(bankColor);
-        //}
+        let bankIndex, bankColor;    
+
+        this.log("Inside updateBankMenuColor - padSessionSection");
+        let c = this.padSessionSection.component;
+        bankIndex = c.getCurrentBank();
+        bankColor = Color.Bank[bankIndex];
+        this.bankMenuColor.fromString(bankColor);
+        this.log("Inside updateBankMenuColor - padDrumSection");
+        let d = this.padDrumSection.component;
+        bankIndex = d.getCurrentBank();
+        bankColor = Color.Bank[bankIndex];
+        this.bankMenuColor.fromString(bankColor);
     }
 
     // Using this as the Initiation
@@ -409,111 +406,166 @@ class LaunchKeyMK3ExtendedComponent extends PreSonus.ControlSurfaceComponent {
         this.recordLED.setValue(record, true);
     }
 
+    /**
+     * Renders the drum mode for the LaunchKey MKIII component.
+     * 
+     * This function handles the activation of the drum handler, rendering the current drum mode,
+     * and updating the UI elements based on the current state of the drum mode, note repeat, and full velocity mode.
+     */
     renderDrumMode = function () {
+        // Log the entry into the function
         this.log("Entering renderDrumMode");
-    
+
+        // Activate the drum handler and render the current drum mode
         this.log("Activating drum handler and rendering current drum mode");
         this.modes.activateDrumHandler();
         const currentDrumMode = this.modes.getCurrentDrumMode();
         currentDrumMode.render(this, this.model.root);
-    
+
+        // Check if the drum mode is active
         const isDrumModeActive = this.modes.isDrumMode();
         this.log(`Checking if drum mode is active: ${isDrumModeActive}`);
         if (isDrumModeActive) {
-            
+            // Log the active drum mode and render it
             this.log(`Drum mode is active, rendering ${currentDrumMode.id}`);
-            currentDrumMode.activeRender(this, this.model.root);    
-            
+            currentDrumMode.activeRender(this, this.model.root);
+
+            // Check if note repeat is active and update the scene button color if it is
             const noteRepeatActive = this.noteRepeatElement.getParamValue(PreSonus.NoteRepeat.kActive);
-            this.log(`Note repeat active status: ${noteRepeatActive}`);            
+            this.log(`Note repeat active status: ${noteRepeatActive}`);
             if (noteRepeatActive) {
                 this.modes.params.scene_button.color.fromString('#0000FF');
                 //this.resetChannelsUpdatedFlag(); // Reset Channels Update flag to render knobs
             }
-                
-            this.log("Setting ssm_button effect to PULSE");
-            this.modes.params.ssm_button.effect.setValue(Effect.PULSE);
-    
+
+            // Retrieve the current value of the effect
+            const currentEffectValue = this.modes.params.ssm_button.effect.getValue();
+
+            // Check if the current value is already Effect.PULSE
+            if (currentEffectValue !== Effect.PULSE) {
+                // If not, set the value to Effect.PULSE
+                this.modes.params.ssm_button.effect.setValue(Effect.PULSE);
+            }
+
+            // Check if full velocity mode is active and update the ssm button color accordingly
             const fullVelocityModeActive = this.fullVelocityMode.value;
             this.log(`Checking full velocity mode: ${fullVelocityModeActive}`);
             if (fullVelocityModeActive) {
                 this.modes.params.ssm_button.color.fromString('purple');
-            }
-            else {
+            } else {
                 this.modes.params.ssm_button.color.setValue(0);
             }
         }
-    
+
+        // Update the channels and log the exit from the function
         this.log("Updating channels");
-        this.updateChannels();    
+        this.updateChannels();
         this.log("Exiting renderDrumMode");
     }
 
+    /**
+     * Renders the session mode for the LaunchKey MKIII component.
+     * 
+     * This function handles the rendering of the current session mode, updating the UI elements
+     * based on the current state of the session mode, and activating the session handler.
+     */
     renderSessionMode = function () {
+        // Retrieve the current session mode
         const mode = this.modes.getCurrentSessionMode();
         this.log("renderSessionMode function: " + mode.id);
-    
+
+        // Handle specific session modes
         switch (mode.id) {
             case 'bank':
-                this.bankMenu.value = this.padSessionSection.component.getCurrentBank(); // make sure value is up-to-date
+                // Update the bank menu value to ensure it is up-to-date
+                this.bankMenu.value = this.padSessionSection.component.getCurrentBank();
                 break;
             case 'hui':
+                // Defer the command to view the console
                 Host.GUI.Commands.deferCommand("View", "Console", false, Host.Attributes(["State", true]));
                 break;
         }
-    
+
+        // Activate the session handler
         this.log("calling activateSessionHandler from renderSessionMode");
         this.modes.activateSessionHandler();
-    
+
+        // Check if the current device pad mode is 'session'
         if (this.modes.getCurrentDevicePadMode().id === 'session') {
+            // Update the editor mode active value based on the session mode
             this.editorModeActive.value = mode.id === 'eventedit' || mode.id === 'stepedit';
         }
-    
+
+        // Render the current session mode
         mode.render(this, this.model.root);
-    
+
+        // If the session mode is active, perform additional rendering
         if (this.modes.isSessionMode()) {
             mode.activeRender(this, this.model.root);
-            // Render here as above method resets sub buttons
+            // Render HUI mode if the current session mode is 'hui'
             if (mode.id === 'hui') {
                 this.renderHuiMode();
             }
         }
-    
+
+        // Update the channels
         this.updateChannels();
     }
 
     renderHuiMode = function () {
         this.log("Entering renderHuiMode function");
-        const hui = this.modes.getCurrentHuiMode(); // changed to const vs let
+        const hui = this.modes.getCurrentHuiMode(); // Get the current HUI mode
     
-        // Loop through each pad and set its state
-        //for (let i = 0; i < kPadCount; i++) {
+        // Loop through each pad and set its state -- REMOVED
+        // for (let i = 0; i < kPadCount; i++) {
         //    this.padSessionSection.component.setPadState(i, 1);
-        //}
+        // }
         
         // Set the color from the hui mode
         this.modes.params.ssm_button.color.fromString(hui.color);
     }
 
-    onHuiScrollOptions = function (state) {  // This function is also called by the surface.xml elements by the sceneHold button
-        this.log ("onHuiScrollOptions - state: " + state);
+    /**
+     * Handles the HUI scroll options for the LaunchKey MKIII component.
+     * 
+     * This function is triggered by the surface.xml elements via the sceneHold button.
+     * It updates the toggle states and colors of the channels based on the current session mode
+     * and the provided state. If the state is true, it sets the toggle generic, updates the pad toggle
+     * colors, and applies specific colors to certain channels. If the state is false, it updates the channels.
+     * 
+     * @param {boolean} state - The state indicating whether to activate or deactivate the HUI scroll options.
+     */
+    onHuiScrollOptions = function (state) {
+        // Log the current state
+        this.log("onHuiScrollOptions - state: " + state);
+
+        // Retrieve the current session mode
         let mode = this.modes.getCurrentSessionMode();
+
         if (state) {
+            // If state is true, set the toggle generic and update pad toggle colors for all channels
             for (let i = 0; i < this.modes.channels.length; i++) {
                 this.modes.channels[i].setToggleGeneric();
                 this.modes.channels[i].padToggleColor.setValue(0);
                 this.modes.channels[i].padToggleEffect.setValue(Effect.NONE);
             }
-            this.log ("onHuiScrollOptions - color switch: " + mode.id);
+
+            // Log the color switch for the current mode
+            this.log("onHuiScrollOptions - color switch: " + mode.id);
+
+            // Apply specific colors to certain channels
             this.modes.channels[0].padToggleColor.fromString('#00FF00');
             this.modes.channels[1].padToggleColor.fromString('#002200');
             this.modes.channels[6].padToggleColor.fromString('#002200');
             this.modes.channels[7].padToggleColor.fromString('#00FF00');
 
+            // Update pad toggle colors for channels 2 to 5 based on the bank list value
             for (let i = 2; i < 6; i++) {
                 this.modes.channels[i].padToggleColor.fromString((this.bankList.value == i - 2) ? '#00FFFF' : '#003333');
                 this.log(`onHuiScrollOptions - bankList: ${this.bankList.value}`);
-            }} else {
+            }
+        } else {
+            // If state is false, update the channels
             this.updateChannels();
         }
     }

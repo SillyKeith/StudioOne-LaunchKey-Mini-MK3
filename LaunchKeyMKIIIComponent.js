@@ -307,25 +307,48 @@ class LaunchKeyMK3ExtendedComponent extends PreSonus.ControlSurfaceComponent {
         this.onActivateNoteRepeat(repeatActive);
     }
 
+    /**
+     * Handles the logic for when the note repeat button is pressed.
+     * 
+     * @param {boolean} state - The state of the note repeat button (pressed or not).
+     */
     onNoteRepeatButtonPressed = function (state) {
+        // If the state is false or the current device pad mode is not 'drum', exit the function.
         if (!state || this.modes.getCurrentDevicePadMode().id != 'drum')
             return;
+
+        // Log the action for debugging purposes.
         this.log("inside onNoteRepeatButtonPressed");
+
+        // Reset the channel update flag.
+        this.resetChannelsUpdatedFlag();
+
+        // Check and store if the shift modifier is pressed.
         const shiftPressed = this.shiftModifier.value;
+
+        // Get the current values of the note repeat active and spread parameters.
         const repeatActive = this.noteRepeatElement.getParamValue(PreSonus.NoteRepeat.kActive);
         const spreadActive = this.noteRepeatElement.getParamValue(PreSonus.NoteRepeat.kSpread);
 
+        // If the shift modifier is not pressed.
         if (!shiftPressed) {
+            // If spread is active, deactivate it.
             if (spreadActive)
                 this.noteRepeatElement.setParamValue(PreSonus.NoteRepeat.kSpread, false);
-            else
+            // Otherwise, toggle the active state of note repeat.
+            else {
                 this.noteRepeatElement.setParamValue(PreSonus.NoteRepeat.kActive, !repeatActive);
+
+            }
         }
+        // If the shift modifier is pressed.
         else {
+            // If note repeat is active, deactivate both note repeat and spread.
             if (repeatActive) {
                 this.noteRepeatElement.setParamValue(PreSonus.NoteRepeat.kActive, false);
                 this.noteRepeatElement.setParamValue(PreSonus.NoteRepeat.kSpread, false);
             }
+            // Otherwise, activate both note repeat and spread.
             else {
                 this.noteRepeatElement.setParamValue(PreSonus.NoteRepeat.kActive, true);
                 this.noteRepeatElement.setParamValue(PreSonus.NoteRepeat.kSpread, true);
@@ -405,7 +428,7 @@ class LaunchKeyMK3ExtendedComponent extends PreSonus.ControlSurfaceComponent {
             this.log(`Note repeat active status: ${noteRepeatActive}`);            
             if (noteRepeatActive) {
                 this.modes.params.scene_button.color.fromString('#0000FF');
-                this.resetChannelsUpdatedFlag(); // Reset Channels Update flag to render knobs
+                //this.resetChannelsUpdatedFlag(); // Reset Channels Update flag to render knobs
             }
                 
             this.log("Setting ssm_button effect to PULSE");
@@ -508,17 +531,18 @@ class LaunchKeyMK3ExtendedComponent extends PreSonus.ControlSurfaceComponent {
         }
 
         // Reset all pots to generic if not already set
-        // Wondering what happens with this is not called
-        //for (let i = 0; i < kBankCount; i++) {
-        //    if (!this.modes.channels[i].isPadGeneric()) {
-        //        this.log(`Resetting pad for channel ${i} to generic`);
-        //        this.modes.channels[i].setPadGeneric();
-        //    }
-        //    if (!this.modes.channels[i].isPotGeneric()) {
-        //        this.log(`Resetting pot for channel ${i} to generic`);
-        //        this.modes.channels[i].setPotGeneric();
-        //    }
-        //}
+        // If this is not done, the pots and pads will not be reset to generic when switching modes or changing settings
+        // For example the note repeat rate and gate pots will not be reset to generic when switching from drum mode to session mode leaving them set to note repeat
+        for (let i = 0; i < kBankCount; i++) {
+            if (!this.modes.channels[i].isPadGeneric()) {
+                this.log(`Resetting pad for channel ${i} to generic`);
+                this.modes.channels[i].setPadGeneric();
+            }
+            if (!this.modes.channels[i].isPotGeneric()) {
+                this.log(`Resetting pot for channel ${i} to generic`);
+                this.modes.channels[i].setPotGeneric();
+            }
+        }
 
         // Check if drum mode is active
         if (this.modes.isDrumMode()) {
@@ -531,6 +555,9 @@ class LaunchKeyMK3ExtendedComponent extends PreSonus.ControlSurfaceComponent {
                 this.modes.channels[0].connectPot(this.noteRepeatElement, 'rate');
                 this.log("Connecting pot for gate on channel 2 to noteRepeatElement");
                 this.modes.channels[2].connectPot(this.noteRepeatElement, 'gate');
+                // Mark these pots as not generic so that the next time updateChannels is called, these will be reset
+                this.modes.channels[0].resetPotGeneric();
+                this.modes.channels[2].resetPotGeneric();
             }
         }
 
@@ -544,6 +571,8 @@ class LaunchKeyMK3ExtendedComponent extends PreSonus.ControlSurfaceComponent {
                 case 'setup':
                     this.log("Session mode is 'setup', connecting pot for tempo on channel 0 to transportPanelElement");
                     this.modes.channels[0].connectPot(this.transportPanelElement, 'tempo');
+                    // Mark this pot as not generic so that the next time updateChannels is called, it will be reset
+                    this.modes.channels[0].resetPotGeneric();
                     break;
 
                 case 'hui':
@@ -577,15 +606,23 @@ class LaunchKeyMK3ExtendedComponent extends PreSonus.ControlSurfaceComponent {
         switch (potMode.id) {
         case 'volume':
             channel.connectPot('volume');
+            // Mark the pots as not generic so that the next time updateChannels is called, it will be reset
+            channel.resetPotGeneric();
             break;
         case 'pan':
             channel.connectPot('pan');
+            // Mark the pots as not generic so that the next time updateChannels is called, it will be reset
+            channel.resetPotGeneric();
             break;
         case 'sendA':
             channel.connectPot(channel.sendsBankElement.getElement(0), "sendlevel");
+            // Mark the pots as not generic so that the next time updateChannels is called, it will be reset
+            channel.resetPotGeneric();
             break;
         case 'sendB':
             channel.connectPot(channel.sendsBankElement.getElement(1), "sendlevel");
+            // Mark the pots as not generic so that the next time updateChannels is called, it will be reset
+            channel.resetPotGeneric();
             break;
     }
 

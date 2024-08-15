@@ -86,7 +86,7 @@ class Channel {
 
     setPotGeneric() {
         this.genericElement.connectAliasParam(this.potValue, 'value');
-        this.padGeneric = true;
+        this.potGeneric = true;
     }
 
     setToggleGeneric() {
@@ -104,7 +104,15 @@ class Channel {
         Host.Console.writeLine(`Inside setPadGeneric`);
         this.setToggleGeneric();
         this.setSelectGeneric();
-        this.potGeneric = true;
+        this.padGeneric = true;
+    }
+
+    resetPotGeneric() {
+        this.potGeneric = false;
+    }
+
+    resetPadGeneric() {
+        this.padGeneric = false;
     }
 }
 

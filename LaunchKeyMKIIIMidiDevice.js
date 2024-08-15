@@ -23,7 +23,7 @@ class ColorLEDHandler extends PreSonus.ControlHandler {
         this.status = status;
         this.address = address;
         this.effect = 0;
-        this.state = status > 169 ? 1 : 0; // Set default state based on status so the SSM and Scene buttons can be lit up since they don't have a state..
+        this.state = 1; // Set default state based on status so the SSM and Scene buttons can be lit up since they don't have a state..
         this.color = new Color(0);  // Default color is black
         this.value = 0;
         this.debugLog = true;

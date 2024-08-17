@@ -156,7 +156,8 @@ class LaunchKeyMK3ExtendedComponent extends PreSonus.ControlSurfaceComponent {
         Host.Signals.signal("LaunchKeyMK3", 'paramChanged', param); // This allows the BASIC component to receive signals.
         if (!param)
             return;
-        this.log("LaunchkeyComponent.js paramChanged value changed to " + param.value);
+        this.log(`LaunchkeyComponent.js paramChanged value changed to ${param.value}`);
+    
         switch (param) {
             case this.modes.params.device_pad:
                 this.log(`Entered device_pad case with value: ${param.value}`);
@@ -439,7 +440,7 @@ class LaunchKeyMK3ExtendedComponent extends PreSonus.ControlSurfaceComponent {
             }
 
             // Retrieve the current value of the effect
-            const currentEffectValue = this.modes.params.ssm_button.effect.getValue();
+            const currentEffectValue = this.modes.params.ssm_button.effect.value;
 
             // Check if the current value is already Effect.PULSE
             if (currentEffectValue !== Effect.PULSE) {

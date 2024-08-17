@@ -116,32 +116,53 @@ class Channel {
     }
 }
 
+/**
+ * Class representing a PadMode.
+ */
 class PadMode {
+    /**
+     * Create a PadMode.
+     * @param {string} id - The ID of the pad mode.
+     * @param {number} index - The index of the pad mode.
+     */
     constructor(id, index) {
         this.id = id;
         this.index = index;
         this.effectParams = [];
     }
 
+    /**
+     * Initialize the pad mode.
+     * @param {number} index - The index to set.
+     * @param {Object} component - The component to associate with this pad mode.
+     */
     init(index, component) {
         this.index = index;
         this.component = component;
         this.handler = component.getHandler(index);
+        Host.Console.writeLine(`Initialized pad mode ${this.id} with index ${this.index}`);
     }
 
+    /**
+     * Add a render handler function.
+     * @param {Function} func - The render handler function to add.
+     */
     addRenderHandler(func) {
         Host.Console.writeLine(`Entered addRenderHandler for ${this.id}`);
         
         if (!this.renderHandlers) {
             this.renderHandlers = [];
-        } else {
-            Host.Console.writeLine(`renderHandlers array already exists for ${this.id}, length: ${this.renderHandlers.length}`);
         }
-        
+
         this.renderHandlers.push(func.bind(this));
         Host.Console.writeLine(`Added new render handler for ${this.id}`);
     }
 
+    /**
+     * Render the pad mode.
+     * @param {Object} host - The host object.
+     * @param {Object} root - The root object.
+     */
     render(host, root) {
         Host.Console.writeLine(`Entered render function for ${this.id}`);
         this.resetEffects();
@@ -150,14 +171,22 @@ class PadMode {
         this.renderHandlers.forEach(handler => handler(host, root));
     }
 
+    /**
+     * Add an active render handler function.
+     * @param {Function} func - The active render handler function to add.
+     */
     addActiveRenderHandler(func) {
         Host.Console.writeLine(`Entering active render handler`);
         if (!this.activeRenderHandlers) this.activeRenderHandlers = [];
         this.activeRenderHandlers.push(func.bind(this));
     }
 
+    /**
+     * Render the pad mode in active state.
+     * @param {Object} host - The host object.
+     * @param {Object} root - The root object.
+     */
     activeRender(host, root) {
-        // Reset the scene button
         Host.Console.writeLine(`In activeRender for ${this.id}`);
         host.modes.params.scene_button.color.setValue(0);
         host.modes.params.scene_button.effect.setValue(0);
@@ -168,24 +197,52 @@ class PadMode {
         this.activeRenderHandlers.forEach(handler => handler(host, root));
     }
 
+    deactivate(host, root) {
+        Host.Console.writeLine(`Deactivating ${this.id}`);
+        this.component.clearPadPressedState();
+        this.component.setActiveHandler(3); //null handler
+    }
+
+    /**
+     * Set the color of a pad.
+     * @param {number} pad - The pad number.
+     * @param {string|number} value - The color value.
+     * @returns {boolean} - The result of setting the pad color.
+     */
     setColor(pad, value) {
         Host.Console.writeLine(`Setting color for pad: ${pad}, value: ${value}`);
-        if (value.charAt(0) === '#') {
+        if (typeof value === 'string' && value.charAt(0) === '#') {
             value = Color.hexToInt(value);
         }
         return this.component.setPadColor(pad, value);
     }
 
+    /**
+     * Toggle the state and color of a pad.
+     * @param {number} pad - The pad number.
+     * @param {boolean} value - The toggle value.
+     * @param {string|number} color_off - The color when off.
+     * @param {string|number} color_on - The color when on.
+     * @returns {boolean} - The result of toggling the pad.
+     */
     toggle(pad, value, color_off, color_on) {
         Host.Console.writeLine(`Toggling pad: ${pad}, value: ${value}`);
         this.component.setPadState(pad, true);
         return this.setColor(pad, value ? color_on : color_off);
     }
 
+    /**
+     * Set the effect of a pad.
+     * @param {number} pad - The pad number.
+     * @param {number} effect - The effect value.
+     */
     setEffect(pad, effect) {
         this.effectParams[pad].setValue(effect);
     }
 
+    /**
+     * Reset all effects to their default state.
+     */
     resetEffects() {
         this.effectParams.forEach(param => param.setValue(Effect.NONE));
     }
@@ -239,11 +296,22 @@ class HuiMode {
     }
 }
 
+// These sections are found in surface.xml under PadSection element
+// Might use them later.
+var PadSectionID;
+(function (PadSectionID) {
+    PadSectionID["kMain"] = "PadDrumSectionElement";
+    PadSectionID["kSession"] = "PadSessionSectionElement";
+    PadSectionID["kUser"] = "PadUserDefinedSectionElement";
+    PadSectionID["kNone"] = "";
+})(PadSectionID || (PadSectionID = {}));
+
 class Modes extends PreSonus.ControlSurfaceComponent {
     static DrumModes = [
         new DrumMode('play', 0),
         new DrumMode('repeat_menu', 1),
-        new DrumMode('rate_trigger', 2)
+        new DrumMode('rate_trigger', 2),
+        new DrumMode('kIdle', 3) // We need a null handler for turning things off
     ];
 
     static DevicePadModes = [
@@ -360,8 +428,7 @@ class Modes extends PreSonus.ControlSurfaceComponent {
         this.lastTrackEditorType = PreSonus.HostUtils.kEditorTypeNone;
     }
 
-    setupDrumModes(_padElement, _repeatRates, _repeatRateAlias)
-    {
+    setupDrumModes(_padElement, _repeatRates, _repeatRateAlias) {
         this.drumElement = _padElement;
 
         const padComponent = _padElement.component;
@@ -370,15 +437,17 @@ class Modes extends PreSonus.ControlSurfaceComponent {
         Modes.DrumModes.forEach((mode, i) => {
             switch(mode.id) {
                 case 'play':
-                    Host.Console.writeLine("setupDrumModes: Setting up play mode " + mode + "id: " + mode.id);
+                    Host.Console.writeLine("setupDrumModes: Setting up play mode " + mode + "id: " + mode.id);               
+                    // Create a handler for the pad component to handle music input
                     padComponent.addHandlerForRole(PreSonus.PadSectionRole.kMusicInput);
-                    this.params.display.setValue(1, true);
+                    this.params.display.setValue(1, true); // Set the display mode to dimmed colors 1=dimmed colors, 2=bright colors
                     padComponent.getHandler(i).setDisplayMode(PreSonus.MusicPadDisplayMode.kDimmedColors);
                     padComponent.getHandler(i).setPadColor(Color.References['default_bank']);
                     for(let ii = 0; ii < this.bankCount; ii++) {
                         padComponent.getHandler(i).setBankColor(ii, Color.Bank[i]);
                         Host.Console.writeLine(`PLAY: Setting color for padComponent handler ${i}, bank ${ii} to ${Color.Bank[i]}`);
                     }
+
                     break;
                     case 'repeat_menu':
                         Host.Console.writeLine("setupDrumModes: Setting up repeat_menu mode " + mode + " id: " + mode.id);
@@ -420,6 +489,7 @@ class Modes extends PreSonus.ControlSurfaceComponent {
                     break;
                 default:
                     padComponent.addNullHandler();
+                    Host.Console.writeLine(`Null handler added for drum mode: ${mode.id} padComponent: ${padComponent}`);
                     break;
             }
             // Global Initiations for Drum Modes
@@ -433,8 +503,7 @@ class Modes extends PreSonus.ControlSurfaceComponent {
      * @param {Object} _userDefined - The user-defined element to set up session modes for.
      * @param {Object} _bankMenuElement - The bank menu element to set up session modes for.
      */
-    setupSessionModes(_padElement, _userDefined, _bankMenuElement)
-    {
+    setupSessionModes(_padElement, _userDefined, _bankMenuElement) {
         Host.Console.writeLine("Entered setupSessionModes");
         
         // Assign the session and user-defined elements
@@ -586,87 +655,78 @@ class Modes extends PreSonus.ControlSurfaceComponent {
         }
     }
 
-    activateDrumHandler()
-    {
-        Host.Console.writeLine(`Inside activateDrumHandler`);
+    // Other Functions
+
+    activateDrumHandler() {
+        // this.params.drum.value is the handlerindex of the drumElement.component
+        Host.Console.writeLine(`Inside activateDrumHandler ${this.params.drum.value}`);
         this.drumElement.component.setActiveHandler(this.params.drum.value);
     }
 
-    setPadFocusWhenPressed(active)
-    {
+    setPadFocusWhenPressed(active) {
         Host.Console.writeLine(`Inside setPadFocusWhenPressed`);
         this.getDrumMode('play').handler.setFocusPadWhenPressed(active);
     }
-
+    
     activateSessionHandler() {
         Host.Console.writeLine(`Activating session handler getCurrentSessionMode`);
-        let mode = this.getCurrentSessionMode();
+
+        // this.params.session.value is the handlerindex of the sessionElement.component returned by getCurrentSessionMode
+        // this.getCurrentSessionMode().index is the handlerindex of the sessionElement.component
+        const mode = this.getCurrentSessionMode();
+        
         this.sessionElement.component.setActiveHandler(mode.index);
+        if (!this.isDrumMode()) {
+            Host.Console.writeLine(`Suspending processing of drum elements by setting active handler to null`);
+            this.drumElement.component.setActiveHandler(3); // Suspend processing of the drum element by assigning it to the null handler
+        }
         this.userDefinedElement.component.suspendProcessing(mode.id != 'setup');
     }
 
-    // Other Functions
-
-    activateSessionHandler() {
-        Host.Console.writeLine(`Activating session handler getCurrentSessionMode`);
-        let mode = this.getCurrentSessionMode();
-        this.sessionElement.component.setActiveHandler(mode.index);
-        this.userDefinedElement.component.suspendProcessing(mode.id != 'setup');
-    }
-
-    setModifierActive(active)
-    {
+    setModifierActive(active) {
         Host.Console.writeLine(`Inside setModifierActive`);
         this.drumElement.component.setModifierActive(active);
         this.sessionElement.component.setModifierActive(active);
     }
 
-    setDrumFullVelocityMode(active)
+    setDrumFullVelocityMode(active) {
     // The original function name was setFullVelocityMode but this is a native method of Presonus.component.
     // so to avoide collisions renamed to setDrumFullVelocityMode here and in LaunchKeyMKIIIComponent
-    {
         Host.Console.writeLine(`Inside setDrumFullVelocityMode`);
         this.drumElement.component.setFullVelocityMode(active)
     }
 
-    setDrumSessionCurrentBank(bank)
-    {
+    setDrumSessionCurrentBank(bank) {
         Host.Console.writeLine(`Inside setCurrentBank`);
         this.drumElement.component.setCurrentBank(bank);
         this.sessionElement.component.setCurrentBank(bank);
     }
 
     // Consolidated the SetDisplayMode and toggleNextPadDisplayMode functions into one function
-    // Also removed array creation since PreSonus.MusicPadDisplayMode exists in the PreSonus namespace
+    // Also removed kNoColors from the display modes since I removed the LED State from the pads
     toggleNextPadDisplayMode() {
         Host.Console.writeLine(`Inside toggleNextPadDisplayMode`);
         let nextMode = this.params.display.value + 1;
         if (nextMode > 2) {
             nextMode = 0;
         }
-
-        // We can no longer set the pads to kNoColors after disabling the LEDButtonState. Small price to pay for fewer midi signals.
+    
         const modes = [
-            PreSonus.MusicPadDisplayMode.kNoColors,
-            PreSonus.MusicPadDisplayMode.kDimmedColors,
-            PreSonus.MusicPadDisplayMode.kBrightColors,
+            PreSonus.MusicPadDisplayMode.kNoColors, // index 0
+            PreSonus.MusicPadDisplayMode.kDimmedColors, // index 1
+            PreSonus.MusicPadDisplayMode.kBrightColors, // index 2
         ];
-
+    
         this.params.display.setValue(nextMode, true);
         this.getDrumMode('play').handler.setDisplayMode(modes[nextMode]);
-        Host.Console.writeLine(`toggleNextPadDisplayMode: nextMode: ${nextMode}`);
+        if (nextMode === 0) {
+            Host.Console.writeLine(`Setting active handler to null so pads turn off`)
+            this.drumElement.component.setActiveHandler(3); // Suspend processing of the drum element by assigning it to the null handler breifly to setstate 0.
+        } else {
+            Host.Console.writeLine(`Setting active handler back to enabled`)
+            this.drumElement.component.setActiveHandler(this.params.drum.value);
     }
-
-    activateDrumHandler()
-    {
-        Host.Console.writeLine(`Inside activateDrumHandler`);
-        this.drumElement.component.setActiveHandler(this.params.drum.value);
-    }
-
-    setPadFocusWhenPressed(active)
-    {
-        Host.Console.writeLine(`Inside setPadFocusWhenPressed`);
-        this.getDrumMode('play').handler.setFocusPadWhenPressed(active);
+    Host.Console.writeLine(`toggleNextPadDisplayMode: nextMode: ${nextMode}`);
     }
 
     getCurrentDevicePadMode() {

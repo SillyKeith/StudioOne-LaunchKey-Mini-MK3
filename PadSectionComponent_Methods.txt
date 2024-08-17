@@ -189,7 +189,8 @@
 
 
 Component Prototype Methods for component:
-getPadCountsetPadState
+getPadCount
+setPadState
 setPadColor
 setPadRate
 addHandler

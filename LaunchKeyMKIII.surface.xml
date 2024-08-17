@@ -256,10 +256,16 @@
 
     <Mappings>
         <!-- definitions to use symbolic names (must be kept in sync with script!) -->
+  		<!-- ******************************************************************************************** -->
+		<!-- CONSTANTS -->
+		<!-- ******************************************************************************************** -->
+ 
+        <!-- Pad Workflows aka DrumModes -->
         <define name="$DRUM[PLAY_MODE]" value="0" />
         <define name="$DRUM[REPEAT_MENU_MODE]" value="1" />
         <define name="$DRUM[RATE_TRIGGER_MODE]" value="2" />
 
+        <!-- Modes aka SessionMode -->
         <define name="$SESSION[STEP_EDIT_MODE]" value="0" />
         <define name="$SESSION[EVENT_EDIT_MODE]" value="1" />
         <define name="$SESSION[SETUP_MODE]" value="2" />
@@ -268,6 +274,8 @@
         <define name="$SESSION[LOOP_EDIT_MODE]" value="5" />
         <define name="$SESSION[INSTRUMENT_EDIT_MODE]" value="6" />
         
+        <!-- Pad Layouts aka DevicePadModes -->
+        <!-- Custom0 is 5 not 0 -->
         <define name="$DEVICE_PAD_MODE_SESSION" value="2" />
         <define name="$DEVICE_PAD_MODE_DRUM" value="1" />
         <define name="$DEVICE_PAD_MODE_CUSTOM" value="5" />
@@ -296,7 +304,7 @@
         <!-- ******************************************************************************************** -->
         <PadSection name="PadSessionSectionElement" rows="2" roles="stepedit">
             <foreach variable="$i" count="8">
-                <Pad name="sessionHigherPad[$i]" control="sessionHigherPad[$i]">
+                <Pad name="sessionHigherPad[$i]" control="sessionHigherPad[$i]" param="state">
                     <!-- <Value control="sessionHigherPadState[$i]" param="state" /> -->
                     <PlainValue control="sessionHigherPadLED[$i]" param="color" />
                     <using device="@global">
@@ -305,7 +313,7 @@
                 </Pad>
             </foreach>
             <foreach variable="$i" count="8">
-                <Pad name="sessionLowerPad[$i]" control="sessionLowerPad[$i]">
+                <Pad name="sessionLowerPad[$i]" control="sessionLowerPad[$i]" param="state">
                     <!-- <Value control="sessionLowerPadState[$i]" param="state" /> -->
                     <PlainValue control="sessionLowerPadLED[$i]" param="color" />
                     <using device="@global">
@@ -321,7 +329,7 @@
             <foreach variable="$i" count="8">
                 <ParamVariant using="@global" param="sessionMode" strict="true">
                     <Group value="$SESSION[SETUP_MODE]">
-                        <Pad name="sessionHigherPad[$i]" control="sessionHigherPad[$i]">
+                        <Pad name="sessionHigherPad[$i]" control="sessionHigherPad[$i]" param="state">
                             <!-- <Value control="sessionHigherPadState[$i]" param="state" /> -->
                             <PlainValue control="sessionHigherPadLED[$i]" param="color" />
                         </Pad>
@@ -332,7 +340,7 @@
 
         <PadSection name="PadDrumSectionElement" rows="2" roles="musicinput">
             <foreach variable="$i" count="16">
-                <Pad name="drumPad[$i]" control="drumPad[$i]">
+                <Pad name="drumPad[$i]" control="drumPad[$i]" param="state">
                     <!-- <Value control="drumPadState[$i]" param="state" /> -->
                     <PlainValue control="drumPadLED[$i]" param="color" />
                     <using device="@global">

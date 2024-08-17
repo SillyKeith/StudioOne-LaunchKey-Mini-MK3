@@ -197,6 +197,11 @@ class PadMode {
         this.activeRenderHandlers.forEach(handler => handler(host, root));
     }
 
+    /**
+     * Deactivate the active renderers and set to IDLE. Currently not used.
+     * @param {*} host 
+     * @param {*} root 
+     */
     deactivate(host, root) {
         Host.Console.writeLine(`Deactivating ${this.id}`);
         this.component.clearPadPressedState();
@@ -270,7 +275,7 @@ class SessionMode extends PadMode {
         this.id = id;
         this.color = color;
         this.skip = skip;
-        this.index = index; // Add index property
+        this.index = index;
         this.effectParams = SessionMode.EffectParams;
     }
 }
@@ -298,15 +303,16 @@ class HuiMode {
 
 // These sections are found in surface.xml under PadSection element
 // Might use them later.
-var PadSectionID;
-(function (PadSectionID) {
-    PadSectionID["kMain"] = "PadDrumSectionElement";
-    PadSectionID["kSession"] = "PadSessionSectionElement";
-    PadSectionID["kUser"] = "PadUserDefinedSectionElement";
-    PadSectionID["kNone"] = "";
-})(PadSectionID || (PadSectionID = {}));
+//var PadSectionID;
+//(function (PadSectionID) {
+//    PadSectionID["kMain"] = "PadDrumSectionElement";
+//    PadSectionID["kSession"] = "PadSessionSectionElement";
+//    PadSectionID["kUser"] = "PadUserDefinedSectionElement";
+//    PadSectionID["kNone"] = "";
+//})(PadSectionID || (PadSectionID = {}));
 
 class Modes extends PreSonus.ControlSurfaceComponent {
+    // These are the WorkFlows for when we're in Drum Layout
     static DrumModes = [
         new DrumMode('play', 0),
         new DrumMode('repeat_menu', 1),
@@ -314,15 +320,20 @@ class Modes extends PreSonus.ControlSurfaceComponent {
         new DrumMode('kIdle', 3) // We need a null handler for turning things off
     ];
 
+    // These are the natively controlled layouts but we need to keep track of them.
+    // MK3 25 only has buttons for Session(2), Drum(1), and Custom(5)
+    // Drum Layout is the default and is the primary musicinput handler
     static DevicePadModes = [
-        new DevicePadMode('custom-old', 0),
+        new DevicePadMode('custom-old', 0),     // unused
         new DevicePadMode('drum', 1),
         new DevicePadMode('session', 2),
-        new DevicePadMode('scalechords', 3),
-        new DevicePadMode('userchords', 4),
+        new DevicePadMode('scalechords', 3),    // unused but here for MK3 49, 61, 80
+        new DevicePadMode('userchords', 4),     // unused but here for MK3 49, 61, 80
         new DevicePadMode('custom', 5)
     ];
 
+    // These are the natively controlled Pot modes but we need to keep track of them.
+    // MK3 25 only has buttons for Volume(1), Device(2), Pan(3), Sends(4), and Custom(6)
     static DevicePotModes = [
         new DevicePotMode('custom', 0),
         new DevicePotMode('volume', 1),
@@ -333,6 +344,7 @@ class Modes extends PreSonus.ControlSurfaceComponent {
         new DevicePotMode('custom', 6)  // added this to remove error when selecting custom as 6 is returned, not 0
     ];
 
+    // These are the WorkFlows for when we're in Session Layout
     static SessionModes = [
         new SessionMode('stepedit', '#AAAA00', false, 0),
         new SessionMode('eventedit', '#AAAA00', false, 1),
@@ -342,6 +354,7 @@ class Modes extends PreSonus.ControlSurfaceComponent {
         new SessionMode('loopedit', 'aqua', true, 5)
     ];
 
+    // These are the modes for when we're in HUI Layout
     static HuiModes = [
         new HuiMode('monitor', '#00A9FF', ['#00454F', '#00A9FF'], Effect.NONE, 0),
         new HuiMode('arm', '#FF4C87', ['#202020','#FF4C87'], Effect.PULSE, 1),
@@ -392,9 +405,10 @@ class Modes extends PreSonus.ControlSurfaceComponent {
             }
         };
   
-        // The basic component does not send a bankCount, so we need to check if this was the caller before proceeding
+        // The basic component does not send a bankCount, so we need to check if this was the caller before proceeding and return early.
         if( ! bankCount )
             return;
+        
         // add alias parameters for vpots, etc.
         const channelBankElement = root.find ("MixerElement/RemoteBankElement");
         this.channels = [];
@@ -540,7 +554,7 @@ class Modes extends PreSonus.ControlSurfaceComponent {
                 case 'eventedit':
                     {
                         Host.Console.writeLine(`Setting up eventedit mode for id: ${mode.id} index: ${mode.index}`);
-                        const commands = []; // Initialize the commands array changed from let to const
+                        const commands = [];
                         PreSonus.PadSection.addCommand (commands, 10, "Edit", "Duplicate", 0, null, '#E2D762');
                         PreSonus.PadSection.addCommand (commands, 15, "Edit", "Delete", 0, null, '#FF0000');
                         // NOTE: macro command names contain the base64-encoded macro filename (e.g. "Vel +10")
@@ -554,8 +568,8 @@ class Modes extends PreSonus.ControlSurfaceComponent {
                 case 'setup':
                     {
                         Host.Console.writeLine(`Setting up setup mode for id: ${mode.id} index: ${mode.index}`);
-                        const commands = []; // Initialize the commands array changed from let to const
-                        const userCommands = []; // Initialize the userCommands array changed from let to const
+                        const commands = [];
+                        const userCommands = [];
 
                         // make first 8 pads user-assignable
                         for(let ii = 0; ii < 8; ii++)
@@ -678,7 +692,7 @@ class Modes extends PreSonus.ControlSurfaceComponent {
         this.sessionElement.component.setActiveHandler(mode.index);
         if (!this.isDrumMode()) {
             Host.Console.writeLine(`Suspending processing of drum elements by setting active handler to null`);
-            this.drumElement.component.setActiveHandler(3); // Suspend processing of the drum element by assigning it to the null handler
+            this.drumElement.component.setActiveHandler(3); // Suspend processing of the drum element by assigning it to the null handler while we're not in Drum Layout
         }
         this.userDefinedElement.component.suspendProcessing(mode.id != 'setup');
     }
@@ -708,25 +722,25 @@ class Modes extends PreSonus.ControlSurfaceComponent {
         Host.Console.writeLine(`Inside toggleNextPadDisplayMode`);
         let nextMode = this.params.display.value + 1;
         if (nextMode > 2) {
-            nextMode = 0;
+            nextMode = 1;
         }
     
         const modes = [
-            PreSonus.MusicPadDisplayMode.kNoColors, // index 0
+            null, // PreSonus.MusicPadDisplayMode.kNoColors, // index 0
             PreSonus.MusicPadDisplayMode.kDimmedColors, // index 1
             PreSonus.MusicPadDisplayMode.kBrightColors, // index 2
         ];
     
         this.params.display.setValue(nextMode, true);
         this.getDrumMode('play').handler.setDisplayMode(modes[nextMode]);
-        if (nextMode === 0) {
-            Host.Console.writeLine(`Setting active handler to null so pads turn off`)
-            this.drumElement.component.setActiveHandler(3); // Suspend processing of the drum element by assigning it to the null handler breifly to setstate 0.
-        } else {
-            Host.Console.writeLine(`Setting active handler back to enabled`)
-            this.drumElement.component.setActiveHandler(this.params.drum.value);
-    }
-    Host.Console.writeLine(`toggleNextPadDisplayMode: nextMode: ${nextMode}`);
+        //if (nextMode === 0) {
+        //    Host.Console.writeLine(`Setting active handler to null so pads turn off`)
+        //    this.drumElement.component.setActiveHandler(3); // Suspend processing of the drum element by assigning it to the null handler breifly to setstate 0.
+        //} else {
+        //    Host.Console.writeLine(`Setting active handler back to enabled`)
+        //    this.drumElement.component.setActiveHandler(this.params.drum.value);
+    //}
+    // Host.Console.writeLine(`toggleNextPadDisplayMode: nextMode: ${nextMode}`);
     }
 
     getCurrentDevicePadMode() {
@@ -736,13 +750,13 @@ class Modes extends PreSonus.ControlSurfaceComponent {
 
     setDevicePadMode(id) {
         const index = Modes.devicePadModeIdToIndexMap.get(String(id));
-        if (index !== undefined) {
+        //if (index !== undefined) {
             this.params.device_pad.setValue(index, true);  // Set the value of the device pad mode
-        } else {
+        //} else {
             // Handle the case where the id is not found. We should not get here.
-            Host.Console.writeLine(`setDevicePadMode Error: Mode with ID ${id} not found.`);
-            return null;
-        }
+        //    Host.Console.writeLine(`setDevicePadMode Error: Mode with ID ${id} not found.`);
+        //    return null;
+        //}
     }
 
     getCurrentDevicePotMode() { // We need to return the mode object
@@ -765,10 +779,10 @@ class Modes extends PreSonus.ControlSurfaceComponent {
 
     getSessionMode(id) {
         const index = Modes.sessionModeIdToIndexMap.get(String(id)); // Use the IndexMap to translate the id('stepedit', 'eventedit', etc) to an index. Replaces the need for getDevicePadMode
-        if (index !== undefined) {
+        //if (index !== undefined) {
             return Modes.SessionModes[index];
-        }
-        return null;
+        //}
+        //return null;
     }
 
     getCurrentSessionMode() {

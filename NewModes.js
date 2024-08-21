@@ -140,7 +140,7 @@ class PadMode {
         this.index = index;
         this.component = component;
         this.handler = component.getHandler(index);
-        Host.Console.writeLine(`Initialized pad mode ${this.id} with index ${this.index}`);
+        Host.Console.writeLine(`PadMode(init) Initialized ${this.id} with index ${this.index}`);
     }
 
     /**
@@ -155,7 +155,6 @@ class PadMode {
         }
 
         this.renderHandlers.push(func.bind(this));
-        Host.Console.writeLine(`Added new render handler for ${this.id}`);
     }
 
     /**
@@ -442,16 +441,17 @@ class Modes extends PreSonus.ControlSurfaceComponent {
         this.lastTrackEditorType = PreSonus.HostUtils.kEditorTypeNone;
     }
 
+    // Create the Drum Mode handlers
     setupDrumModes(_padElement, _repeatRates, _repeatRateAlias) {
         this.drumElement = _padElement;
 
         const padComponent = _padElement.component;
         padComponent.setPadColoringSupported(true);
-        Host.Console.writeLine("Setting up drum modes " + Modes.DrumModes.length);
+        Host.Console.writeLine(`Setting up ${Modes.DrumModes.length} Drum Mode handlers`);
         Modes.DrumModes.forEach((mode, i) => {
             switch(mode.id) {
                 case 'play':
-                    Host.Console.writeLine("setupDrumModes: Setting up play mode " + mode + "id: " + mode.id);               
+                    Host.Console.writeLine(`setupDrumModes: Setting up play mode for id: ${mode.id}`);
                     // Create a handler for the pad component to handle music input
                     padComponent.addHandlerForRole(PreSonus.PadSectionRole.kMusicInput);
                     this.params.display.setValue(1, true); // Set the display mode to dimmed colors 1=dimmed colors, 2=bright colors
@@ -464,37 +464,23 @@ class Modes extends PreSonus.ControlSurfaceComponent {
 
                     break;
                     case 'repeat_menu':
-                        Host.Console.writeLine("setupDrumModes: Setting up repeat_menu mode " + mode + " id: " + mode.id);
+                        Host.Console.writeLine(`setupDrumModes: Setting up repeat_menu mode for id: ${mode.id}`);
                         const commands = [];
-                        Host.Console.writeLine("Initializing commands array");
-                    
                         PreSonus.PadSection.addCommand(commands, 6, "Note Repeat", "Quantize");
-                        Host.Console.writeLine("Added command: Note Repeat, Quantize to commands array");
-                    
                         PreSonus.PadSection.addCommand(commands, 7, "Note Repeat", "Aftertouch");
-                        Host.Console.writeLine("Added command: Note Repeat, Aftertouch to commands array");
                     
                         mode.addRenderHandler(function(host, root) {
-                            Host.Console.writeLine("Render handler called for repeat_menu mode");
                             const ele = host.noteRepeatElement;
-                            Host.Console.writeLine("Retrieved noteRepeatElement from host");
-                    
                             const quantizeValue = ele.getParamValue('quantize');
-                            Host.Console.writeLine("Quantize value: " + quantizeValue);
                             this.toggle(6, quantizeValue, '#222200', '#00FF00');
-                            Host.Console.writeLine("Toggled button 6 with quantize value");
-                    
                             const pressureHandlingValue = ele.getParamValue('pressureHandling');
-                            Host.Console.writeLine("Pressure handling value: " + pressureHandlingValue);
                             this.toggle(7, pressureHandlingValue, '#222200', '#00FF00');
-                            Host.Console.writeLine("Toggled button 7 with pressure handling value");
                         });
                     
                         padComponent.addCommandInputHandler(commands);
-                        Host.Console.writeLine("Added command input handler to padComponent");
                         break;
                 case 'rate_trigger':
-                    Host.Console.writeLine("setupDrumModes: Setting up rate_trigger mode " + mode + "id: " + mode.id);
+                    Host.Console.writeLine(`setupDrumModes: Setting up rate_trigger mode for id: ${mode.id}`);
                     padComponent.addHandlerForRole(PreSonus.PadSectionRole.kRateTrigger);
                     padComponent.getHandler(i).setPadColor(Color.References['rate_trigger']);
                     for (const [key, value] of Object.entries(_repeatRates)) {
@@ -503,7 +489,7 @@ class Modes extends PreSonus.ControlSurfaceComponent {
                     break;
                 default:
                     padComponent.addNullHandler();
-                    Host.Console.writeLine(`Null handler added for drum mode: ${mode.id} padComponent: ${padComponent}`);
+                    Host.Console.writeLine(`Null handler added for drum mode id: ${mode.id}`);
                     break;
             }
             // Global Initiations for Drum Modes
@@ -823,7 +809,7 @@ class Modes extends PreSonus.ControlSurfaceComponent {
     toggleNextSessionMode() {
         Host.Console.writeLine(`Toggling next session mode getCurrentSessionMode`);
         const currentMode = this.getCurrentSessionMode();
-        const nextMode = currentMode.nextMode;
+        let nextMode = currentMode.nextMode;
     
         // Skip 'loopedit' mode because we are only supposed to enter it via scenehold + play button
         if (nextMode.id === 'loopedit') {

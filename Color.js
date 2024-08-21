@@ -35,7 +35,7 @@ Color.SnapColors =
 ];
 
 Color.References = {
-    'command': '#00FFFF',
+    'command': 'purple',  // was #00FFFF
     'default_bank': '#00FFFF',
     'rate_trigger': 'orange',
     'repeat_menu': 'blue',

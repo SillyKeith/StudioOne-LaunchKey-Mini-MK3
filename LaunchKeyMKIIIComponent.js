@@ -162,6 +162,12 @@ class LaunchKeyMK3ExtendedComponent extends PreSonus.ControlSurfaceComponent {
             case this.modes.params.device_pad:
                 this.log(`Entered device_pad case with value: ${param.value}`);
                 this.resetChannelsUpdatedFlag(); // Reset flag
+                
+                // Why are both being rendered when they are mutually exclusive?
+                // 1 = Drum, 2 = Session and 5 = Custom
+                //
+                //if (param.value === 1 ) this.renderDrumMode();
+                //else if (param.value === 2) this.renderSessionMode();
                 this.renderDrumMode();
                 this.renderSessionMode();
                 break;
@@ -412,6 +418,7 @@ class LaunchKeyMK3ExtendedComponent extends PreSonus.ControlSurfaceComponent {
      * 
      * This function handles the activation of the drum handler, rendering the current drum mode,
      * and updating the UI elements based on the current state of the drum mode, note repeat, and full velocity mode.
+     * These are like WorkFlows "play", "rate_trigger", "repeat_menu", "full_velocity"
      */
     renderDrumMode = function () {
         // Log the entry into the function

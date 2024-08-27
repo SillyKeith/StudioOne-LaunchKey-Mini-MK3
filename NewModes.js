@@ -168,6 +168,7 @@ class PadMode {
         if (!this.renderHandlers) 
             return;
         this.renderHandlers.forEach(handler => handler(host, root));
+        Host.Console.writeLine(`renderHandlers length: ${this.renderHandlers.length}`);
     }
 
     /**
@@ -334,7 +335,7 @@ class Modes extends PreSonus.ControlSurfaceComponent {
     // These are the natively controlled Pot modes but we need to keep track of them.
     // MK3 25 only has buttons for Volume(1), Device(2), Pan(3), Sends(4), and Custom(6)
     static DevicePotModes = [
-        new DevicePotMode('custom', 0),
+        new DevicePotMode('custom-old', 0),     // unused
         new DevicePotMode('volume', 1),
         new DevicePotMode('device', 2),
         new DevicePotMode('pan', 3),
@@ -456,7 +457,7 @@ class Modes extends PreSonus.ControlSurfaceComponent {
                     padComponent.addHandlerForRole(PreSonus.PadSectionRole.kMusicInput);
                     this.params.display.setValue(1, true); // Set the display mode to dimmed colors 1=dimmed colors, 2=bright colors
                     padComponent.getHandler(i).setDisplayMode(PreSonus.MusicPadDisplayMode.kDimmedColors);
-                    padComponent.getHandler(i).setPadColor(Color.References['default_bank']);
+                    padComponent.getHandler(i).setPadColor(Color.References.DEFAULT_BANK);
                     for(let ii = 0; ii < this.bankCount; ii++) {
                         padComponent.getHandler(i).setBankColor(ii, Color.Bank[i]);
                         Host.Console.writeLine(`PLAY: Setting color for padComponent handler ${i}, bank ${ii} to ${Color.Bank[i]}`);
@@ -482,7 +483,7 @@ class Modes extends PreSonus.ControlSurfaceComponent {
                 case 'rate_trigger':
                     Host.Console.writeLine(`setupDrumModes: Setting up rate_trigger mode for id: ${mode.id}`);
                     padComponent.addHandlerForRole(PreSonus.PadSectionRole.kRateTrigger);
-                    padComponent.getHandler(i).setPadColor(Color.References['rate_trigger']);
+                    padComponent.getHandler(i).setPadColor(Color.References.RATE_TRIGGER);
                     for (const [key, value] of Object.entries(_repeatRates)) {
                         padComponent.setPadRate(key, value);
                     }
@@ -534,7 +535,7 @@ class Modes extends PreSonus.ControlSurfaceComponent {
                 case 'stepedit':
                     Host.Console.writeLine(`Setting up stepedit mode for id: ${mode.id} index: ${mode.index}`);
                     padComponent.addHandlerForRole(PreSonus.PadSectionRole.kStepEdit);
-                    padComponent.getHandler(index).setPadColor(Color.References['command']);
+                    padComponent.getHandler(index).setPadColor(Color.References.COMMAND);
                     break;
 
                 case 'eventedit':
@@ -548,7 +549,7 @@ class Modes extends PreSonus.ControlSurfaceComponent {
                         PreSonus.PadSection.addCommand (commands, 7, "Macros", "Macro VmVsICsxMA==", 0, null, '#00AA00');
 
                         padComponent.addCommandInputHandler(commands);
-                        padComponent.getHandler(index).setPadColor(Color.References['command']);
+                        padComponent.getHandler(index).setPadColor(Color.References.COMMAND);
                     } break;
 
                 case 'setup':
@@ -583,7 +584,7 @@ class Modes extends PreSonus.ControlSurfaceComponent {
                         });
 
                         padComponent.addCommandInputHandler(commands);
-                        padComponent.getHandler(index).setPadColor(Color.References['command']);
+                        padComponent.getHandler(index).setPadColor(Color.References.COMMAND);
                     } break;
                 case 'bank':
                     {
@@ -593,7 +594,7 @@ class Modes extends PreSonus.ControlSurfaceComponent {
                             items.push ({"padIndex": ii, "value": ii, "color": Color.Bank[ii]});
 
                         padComponent.addMenuHandler(items, _bankMenuElement);
-                        padComponent.getHandler(index).setPadColor(Color.References['default_bank']);
+                        padComponent.getHandler(index).setPadColor(Color.References.DEFAULT_BANK);
                     } break;
                 case 'loopedit':
                     {
@@ -612,7 +613,7 @@ class Modes extends PreSonus.ControlSurfaceComponent {
                         PreSonus.PadSection.addCommand(commands, 15, "Transport", "Set Loop End", 0, null, '#FF0000');
 
                         padComponent.addCommandInputHandler(commands);
-                        padComponent.getHandler(index).setPadColor(Color.References['command']);
+                        padComponent.getHandler(index).setPadColor(Color.References.COMMAND);
 
                         mode.addActiveRenderHandler( function(host, root) {
                             host.modes.params.scene_button.effect.setValue(Effect.PULSE);
@@ -669,11 +670,10 @@ class Modes extends PreSonus.ControlSurfaceComponent {
     }
     
     activateSessionHandler() {
-        Host.Console.writeLine(`Activating session handler getCurrentSessionMode`);
-
         // this.params.session.value is the handlerindex of the sessionElement.component returned by getCurrentSessionMode
         // this.getCurrentSessionMode().index is the handlerindex of the sessionElement.component
         const mode = this.getCurrentSessionMode();
+        Host.Console.writeLine(`Activating session handler getCurrentSessionMode ${mode.index}`);
         
         this.sessionElement.component.setActiveHandler(mode.index);
         if (!this.isDrumMode()) {

@@ -147,11 +147,62 @@ class PadSectionManager {
     constructor(parent) {
         this.padSectionConfigs = [];
         this.parent = parent;
-        this.debugLog = false;
+        this.debugLog = true;
+        this.activeMusicInputID = PadSectionID.kNone;
         this.currentPadMode = DevicePadMode.DRUM_LAYOUT; // We init to DRUM_LAYOUT on connect in onMidiOutConnected
         this.currentPotMode = DevicePotMode.PAN; // We init to PAN on connect in onMidiOutConnected
     }
-
+    getRateTriggerState(name) {
+        for (let i = 0; i < this.padSectionConfigs.length; i++) {
+            let config = this.padSectionConfigs[i];
+            if (config.name == name)
+                return config.rateTriggerActive;
+        }
+        return false;
+    }
+    setRateTriggerState(name, state) {
+        for (let i = 0; i < this.padSectionConfigs.length; i++) {
+            let config = this.padSectionConfigs[i];
+            if (config.name == name)
+                config.rateTriggerActive = state;
+        }
+        return false;
+    }
+    getHandlerIndexByName(name, role) {
+        for (let i = 0; i < this.padSectionConfigs.length; i++) {
+            let config = this.padSectionConfigs[i];
+            if (config.name == name)
+                return config.roles.indexOf(role);
+        }
+        return -1;
+    }
+    getHandlerIndexByElement(element, role) {
+        for (let i = 0; i < this.padSectionConfigs.length; i++) {
+            let config = this.padSectionConfigs[i];
+            if (config.element == element)
+                return config.roles.indexOf(role);
+        }
+        return -1;
+    }
+    log(msg) {
+        if (this.debugLog)
+            this.parent.log("MK3.PadSectionManager:" + msg);
+    }
+    setupKeyboardModeSettings(c, supportKeyboardLayout) {
+        c.setPadColoringSupported(true);
+        for (let i = 0; i < PadSectionConfig.kPadSnapColors.length; i++)
+            c.addPadPaletteColor(PadSectionConfig.kPadSnapColors[i]);
+        let kbSettings = c.keyboardModeSettings;
+        let colors = PadSectionConfig.kKeyboardModeColors;
+        kbSettings.whiteKeyColor = colors[0];
+        kbSettings.blackKeyColor = colors[1];
+        kbSettings.octave0Color = colors[2];
+        kbSettings.octave1Color = colors[3];
+        kbSettings.octave2Color = colors[4];
+        kbSettings.octave3Color = colors[5];
+        kbSettings.octaveShiftEnabled = false;
+        kbSettings.supportKeyboardLayout = supportKeyboardLayout;
+    }
     activate(element, role) {
         let handlerIndex = this.getHandlerIndexByElement(element, role);
         element.component.setActiveHandler(handlerIndex);
@@ -161,14 +212,215 @@ class PadSectionManager {
         let handlerIndex = this.getHandlerIndexByElement(element, PreSonus.PadSectionRole.kIdle);
         element.component.setActiveHandler(handlerIndex);
     }
-
     add(root) {
-        this.padSectionConfigs.push(new PadSectionElementConfig("PadSection", root));
+        const kXmlElements = [
+            PadSectionID.kDrumMode,
+            PadSectionID.kSessionMode
+        ];
+        for (let i = 0; i < kXmlElements.length; i++) {
+            let name = kXmlElements[i];
+            let element = root.find(name);
+            if (!element)
+                return;
+            let component = element.component;
+            if (!component)
+                return;
+            switch (name) {
+                case PadSectionID.kDrumMode:
+                    {
+                        let config = new PadSectionElementConfig(name, element);
+                        config.roles = [
+                            PreSonus.PadSectionRole.kMusicInput,
+                            PreSonus.PadSectionRole.kIdle,
+                            PreSonus.PadSectionRole.kRateTrigger
+                        ];
+                        this.setupKeyboardModeSettings(component, true);
+                        this.addHandlers(component, config.roles);
+                        this.padSectionConfigs.push(config);
+                        break;
+                    }
+                case PadSectionID.kSessionMode:
+                    {
+                        let config = new PadSectionElementConfig(name, element);
+                        config.roles = [
+                            PreSonus.PadSectionRole.kMusicInput,
+                            PreSonus.PadSectionRole.kIdle,
+                            PreSonus.PadSectionRole.kRateTrigger
+                        ];
+                        this.setupKeyboardModeSettings(component, false);
+                        this.addHandlers(component, config.roles);
+                        this.padSectionConfigs.push(config);
+                        break;
+                    }
+                case PadSectionID.kDualStep:
+                    {
+                        let config = new PadSectionElementConfig(name, element);
+                        config.roles = [
+                            PreSonus.PadSectionRole.kStepEdit,
+                            PreSonus.PadSectionRole.kStepFocus,
+                            PreSonus.PadSectionRole.kIdle
+                        ];
+                        this.setupKeyboardModeSettings(component, false);
+                        this.addHandlers(component, config.roles);
+                        this.padSectionConfigs.push(config);
+                        break;
+                    }
+            }
+        }
     }
-
-    log(msg) {
-        if (this.debugLog)
-            this.parent.log("MK3.PadSectionManager:" + msg);
+    addHandlers(padSectionComponent, roles) {
+        let handlerIndex = 0;
+        for (let roleIndex = 0; roleIndex < roles.length; roleIndex++) {
+            let role = roles[roleIndex];
+            switch (role) {
+                case PreSonus.PadSectionRole.kMusicInput:
+                    {
+                        padSectionComponent.addHandlerForRole(role);
+                        let handler = padSectionComponent.getHandler(handlerIndex);
+                        this.configureMusicInputHandler(handler);
+                        handlerIndex++;
+                        break;
+                    }
+                case PreSonus.PadSectionRole.kStepEdit:
+                case PreSonus.PadSectionRole.kStepFocus:
+                    {
+                        padSectionComponent.addHandlerForRole(role);
+                        handlerIndex++;
+                        break;
+                    }
+                case PreSonus.PadSectionRole.kIdle:
+                    {
+                        padSectionComponent.addNullHandler();
+                        handlerIndex++;
+                        break;
+                    }
+                case PreSonus.PadSectionRole.kRateTrigger:
+                    {
+                        padSectionComponent.addHandlerForRole(role);
+                        padSectionComponent.getHandler(handlerIndex).setPadColor(kRateTriggerColor);
+                        for (let i = 0; i < padRepeatRates.length; i++)
+                            padSectionComponent.setPadRate(i, padRepeatRates[i]);
+                        handlerIndex++;
+                        break;
+                    }
+                default:
+                    break;
+            }
+        }
+    }
+    configureMusicInputHandler(handler) {
+        if (!handler)
+            return;
+        handler.setDisplayMode(PreSonus.MusicPadDisplayMode.kBrightColors);
+        handler.setPadColor(PadSectionConfig.kDefaultBankColor);
+        for (let i = 0; i < PadSectionConfig.kBankCount; i++)
+            handler.setBankColor(i, PadSectionConfig.kBankColors[i]);
+    }
+    getPadSectionElement(name) {
+        for (let i = 0; i < this.padSectionConfigs.length; i++) {
+            let config = this.padSectionConfigs[i];
+            if (config.name == name)
+                return config.element;
+        }
+        return null;
+    }
+    getActiveMusicInputPadSectionElement() {
+        return this.getPadSectionElement(this.activeMusicInputID);
+    }
+    init() {
+        let pse = this.getPadSectionElement(PadSectionID.kDrumMode);
+        this.activate(pse, PreSonus.PadSectionRole.kMusicInput);
+        pse.component.setCurrentOctave(PadSectionConfig.kDefaultOctave);
+        pse.component.setKeyboardModeLayout(PadLayoutID.kKeyboard);
+        this.activeMusicInputID = PadSectionID.kDrumMode;
+        pse = this.getPadSectionElement(PadSectionID.kSessionMode);
+        this.deactivate(pse);
+    }
+    setWorkflow(workflow) {
+        if (workflow == PadWorkflow.kSequencing) {
+            this.deactivate(this.getPadSectionElement(PadSectionID.kDrumMode));
+            this.activate(this.getPadSectionElement(PadSectionID.kSessionMode), PreSonus.PadSectionRole.kMusicInput);
+            this.activeMusicInputID = PadSectionID.kSessionMode;
+        }
+        else if (workflow == PadWorkflow.kStepControl) {
+            this.deactivate(this.getPadSectionElement(PadSectionID.kDrumMode));
+            this.activate(this.getPadSectionElement(PadSectionID.kSessionMode), PreSonus.PadSectionRole.kMusicInput);
+            this.activeMusicInputID = PadSectionID.kSessionMode;
+        }
+        else if (workflow == PadWorkflow.kKeyboardPlay) {
+            this.deactivate(this.getPadSectionElement(PadSectionID.kSessionMode));
+            this.activate(this.getPadSectionElement(PadSectionID.kDrumMode), PreSonus.PadSectionRole.kMusicInput);
+            this.activeMusicInputID = PadSectionID.kDrumMode;
+        }
+    }
+    enableRateTriggerMode(state) {
+        if (state) {
+            if (this.getRateTriggerState(this.activeMusicInputID))
+                return;
+            let pse = this.getPadSectionElement(this.activeMusicInputID);
+            let handlerIndex = this.getHandlerIndexByName(this.activeMusicInputID, PreSonus.PadSectionRole.kRateTrigger);
+            pse.component.setActiveHandler(handlerIndex);
+            this.setRateTriggerState(this.activeMusicInputID, true);
+        }
+        else {
+            if (!this.getRateTriggerState(this.activeMusicInputID))
+                return;
+            let pse = this.getPadSectionElement(this.activeMusicInputID);
+            let handlerIndex = this.getHandlerIndexByName(this.activeMusicInputID, PreSonus.PadSectionRole.kMusicInput);
+            pse.component.setActiveHandler(handlerIndex);
+            this.setRateTriggerState(this.activeMusicInputID, false);
+        }
+    }
+    configureMusicInputPads(modification, value) {
+        let musicInputElements = [PadSectionID.kDrumMode]; // Only DrumMode is musicinput
+        for (let i = 0; i < musicInputElements.length; i++) {
+            let elementName = musicInputElements[i];
+            let c = this.getPadSectionElement(elementName).component;
+            switch (modification) {
+                case PadConfiguration.kScale:
+                    c.setScale(value);
+                    break;
+                case PadConfiguration.kOctave:
+                    c.setCurrentOctave(value);
+                    break;
+                case PadConfiguration.kRootOffset:
+                    c.setRootOffset(value);
+                    break;
+                case PadConfiguration.kRange:
+                    c.setPadOffset(value);
+                    break;
+                case PadConfiguration.kAccentColor:
+                    c.setAccentColor(value);
+                    break;
+                case PadConfiguration.kLayout:
+                    c.setKeyboardModeLayout(value);
+                    break;
+                case PadConfiguration.kFullVelocity:
+                    c.setFullVelocityMode(value);
+                    break;
+                case PadConfiguration.kPadFocus:
+                    {
+                        let handlerIndex = this.getHandlerIndexByName(elementName, PreSonus.PadSectionRole.kMusicInput);
+                        let musicInputHandler = c.getHandler(handlerIndex);
+                        musicInputHandler.setFocusPadWhenPressed(value);
+                    }
+                    break;
+                default:
+                    break;
+            }
+        }
+    }
+    adviseHostSignals(observer) {
+        for (let i = 0; i < this.padSectionConfigs.length; i++) {
+            let config = this.padSectionConfigs[i];
+            Host.Signals.advise(config.element.component, observer);
+        }
+    }
+    unadviseHostSignals(observer) {
+        for (let i = 0; i < this.padSectionConfigs.length; i++) {
+            let config = this.padSectionConfigs[i];
+            Host.Signals.unadvise(config.element.component, observer);
+        }
     }
 }
 
@@ -183,6 +435,8 @@ class MK3ExtendedComponent extends PreSonus.ControlSurfaceComponent {
         this.padSectionManager = new PadSectionManager(this);
         this.padSectionManager.add(root);
         this.padSectionManager.init();
+        this.padWorkflowParam = paramList.addInteger(PadWorkflow.kMin, PadWorkflow.kMax, "padWorkflow");
+        this.padWorkflowParam.setValue(PadWorkflow.kKeyboardPlay);
 
     }
 }

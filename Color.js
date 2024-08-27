@@ -35,18 +35,19 @@ Color.SnapColors =
 ];
 
 Color.References = {
-    'command': 'purple',  // was #00FFFF
-    'default_bank': '#00FFFF',
-    'rate_trigger': 'orange',
-    'repeat_menu': 'blue',
-    'off': '0'
-}
+    COMMAND: 'purple',  // was #00FFFF
+    DEFAULT_BANK: '#00FFFF',
+    RATE_TRIGGER: 'orange',
+    REPEAT_MENU: 'blue',
+    OFF: '0'
+};
 
 Color.Mono = {
      OFF: 0x00,
      HALF: 0x3F,
      ON: 0x7F
 };
+
 Color.Values = {
      BLACK: 0,
      DARK_GREY: 1,

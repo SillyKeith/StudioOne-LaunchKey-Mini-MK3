@@ -146,6 +146,7 @@ class LaunchKeyMK3ExtendedComponent extends PreSonus.ControlSurfaceComponent {
     onExit () {
         Host.Signals.unadvise(this.padSessionSection.component, this);
         Host.Signals.unadvise(this.padDrumSection.component, this);
+        Host.Signals.unadvise(this.padUserDefinedSection.component, this);
         //this.modes.setDevicePadMode('drum');
         PreSonus.HostUtils.enableEngineEditNotifications(this, false);
         PreSonus.HostUtils.enableEditorNotifications(this, false); // disconnect from both since we enable both
@@ -480,7 +481,8 @@ class LaunchKeyMK3ExtendedComponent extends PreSonus.ControlSurfaceComponent {
     renderSessionMode = function () {
         // Retrieve the current session mode
         const mode = this.modes.getCurrentSessionMode();
-        this.log("renderSessionMode function: " + mode.id);
+        const currentDevicePadMode = this.modes.getCurrentDevicePadMode();
+        this.log(`renderSessionMode function: ${mode.id}`);
 
         // Handle specific session modes
         switch (mode.id) {
@@ -499,13 +501,15 @@ class LaunchKeyMK3ExtendedComponent extends PreSonus.ControlSurfaceComponent {
         this.modes.activateSessionHandler();
 
         // Check if the current device pad mode is 'session'
-        if (this.modes.getCurrentDevicePadMode().id === 'session') {
+        if (currentDevicePadMode === 'session') {
             // Update the editor mode active value based on the session mode
             this.editorModeActive.value = mode.id === 'eventedit' || mode.id === 'stepedit';
         }
 
-        // Render the current session mode
-        mode.render(this, this.model.root);
+        // Render the current session mode if the current device pad mode is not 'drum'
+        if (currentDevicePadMode !== 'drum') {
+            mode.render(this, this.model.root);
+        }
 
         // If the session mode is active, perform additional rendering
         if (this.modes.isSessionMode()) {

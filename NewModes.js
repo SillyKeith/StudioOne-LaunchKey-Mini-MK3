@@ -41,39 +41,33 @@ class Channel {
 
     connectToggle(element, paramName) {
         if (!paramName) {
-            Host.Console.writeLine(`Channel class connectToggle: No paramName provided, setting paramName to element ${element}`);
+            //Host.Console.writeLine(`Channel class connectToggle: No paramName provided, setting paramName to element ${element}`);
             paramName = element;
             element = this.channelElement;
         }
-        Host.Console.writeLine(`Channel() connectToggle: Connecting toggle to element: ${element}, paramName: ${paramName}`);
-        Host.Console.writeLine(`Is this.padToggle null or undefined?:: ${this.padToggle.value === null || this.padToggle.value === undefined}`);
+        //Host.Console.writeLine(`Channel() connectToggle: Connecting toggle to element: ${element}, paramName: ${paramName}`);
+        //Host.Console.writeLine(`Is this.padToggle null or undefined?:: ${this.padToggle.value === null || this.padToggle.value === undefined}`);
         return element.connectAliasParam(this.padToggle, paramName);
     }
 
     updateSelectEffect() {
         Host.Console.writeLine(`Inside updateSelectEffect`);
-        if (this.channelElement.getParamValue('selected'))
-            return this.padSelectEffect.setValue(Effect.PULSE);
-
-        this.padSelectEffect.setValue(Effect.NONE);
+        const effect = this.channelElement.getParamValue('selected') ? Effect.PULSE : Effect.NONE;
+        this.padSelectEffect.setValue(effect);
     }
 
     updateToggle(color_off, color_on, effect) {
-        Host.Console.writeLine(`updateToggle - this.padToggle: ${this.padToggle.value}`);
-        if (this.padToggle.value === null || this.padToggle.value === undefined) {
+        const padToggleValue = this.padToggle.value;
+        Host.Console.writeLine(`updateToggle - this.padToggle: ${padToggleValue}`);
+    
+        if (padToggleValue == null) { // Checks for both null and undefined
             this.padToggleColor.setValue(0);
             this.padToggleEffect.setValue(Effect.NONE);
             return;
         }
-        this.padToggleColor.fromString((this.padToggle.value) ? color_on : color_off);
-        Host.Console.writeLine(`We aren't null: this.padToggle.value: ${this.padToggle.value} padToggleColor: ${this.padToggleColor.value}`);
-        Host.Console.writeLine(`Checking effect && this.padToggle.value: ${effect && this.padToggle.value}`);
-        if (effect && this.padToggle.value) {
-            this.padToggleEffect.setValue(effect);
-            Host.Console.writeLine(`Setting effect to ${effect}`);
-        } else {
-            this.padToggleEffect.setValue(Effect.NONE);
-        }
+    
+        this.padToggleColor.fromString(padToggleValue ? color_on : color_off);
+        this.padToggleEffect.setValue(effect && padToggleValue ? effect : Effect.NONE);
     }
 
     isPadGeneric() {
@@ -90,18 +84,18 @@ class Channel {
     }
 
     setToggleGeneric() {
-        Host.Console.writeLine(`Inside setToggleGeneric`);
+        //Host.Console.writeLine(`Inside setToggleGeneric`);
         this.genericElement.connectAliasParam(this.padToggle, 'value');
     }
 
     setSelectGeneric() {
-        Host.Console.writeLine(`Inside setSelectGeneric`);
+        //Host.Console.writeLine(`Inside setSelectGeneric`);
         this.genericElement.connectAliasParam(this.padSelect, 'value');
         this.genericElement.connectAliasParam(this.padSelectColor, 'value');
     }
 
     setPadGeneric() {
-        Host.Console.writeLine(`Inside setPadGeneric`);
+        //Host.Console.writeLine(`Inside setPadGeneric`);
         this.setToggleGeneric();
         this.setSelectGeneric();
         this.padGeneric = true;
@@ -470,6 +464,8 @@ class Modes extends PreSonus.ControlSurfaceComponent {
                         PreSonus.PadSection.addCommand(commands, 6, "Note Repeat", "Quantize");
                         PreSonus.PadSection.addCommand(commands, 7, "Note Repeat", "Aftertouch");
                     
+                        // Create a Rendering handler that will toggle the color of the pads based on the boolean value of the quantize and pressureHandling parameters
+                        // When the user enteres the repeat_menu mode, this handler will be called.
                         mode.addRenderHandler(function(host, root) {
                             const ele = host.noteRepeatElement;
                             const quantizeValue = ele.getParamValue('quantize');
@@ -533,14 +529,14 @@ class Modes extends PreSonus.ControlSurfaceComponent {
             switch(mode.id)
             {
                 case 'stepedit':
-                    Host.Console.writeLine(`Setting up stepedit mode for id: ${mode.id} index: ${mode.index}`);
+                    //Host.Console.writeLine(`Setting up stepedit mode on index: ${mode.index}`);
                     padComponent.addHandlerForRole(PreSonus.PadSectionRole.kStepEdit);
                     padComponent.getHandler(index).setPadColor(Color.References.COMMAND);
                     break;
 
                 case 'eventedit':
                     {
-                        Host.Console.writeLine(`Setting up eventedit mode for id: ${mode.id} index: ${mode.index}`);
+                        //Host.Console.writeLine(`Setting up eventedit mode on index: ${mode.index}`);
                         const commands = [];
                         PreSonus.PadSection.addCommand (commands, 10, "Edit", "Duplicate", 0, null, '#E2D762');
                         PreSonus.PadSection.addCommand (commands, 15, "Edit", "Delete", 0, null, '#FF0000');
@@ -554,7 +550,7 @@ class Modes extends PreSonus.ControlSurfaceComponent {
 
                 case 'setup':
                     {
-                        Host.Console.writeLine(`Setting up setup mode for id: ${mode.id} index: ${mode.index}`);
+                        //Host.Console.writeLine(`Setting up setup mode on index: ${mode.index}`);
                         const commands = [];
                         const userCommands = [];
 
@@ -562,7 +558,7 @@ class Modes extends PreSonus.ControlSurfaceComponent {
                         for(let ii = 0; ii < 8; ii++)
                             PreSonus.PadSection.addCommand(userCommands, ii, "", "", PreSonus.PadSection.kCommandItemUserAssignable);
                         _userDefined.component.addCommandInputHandler(userCommands);
-                        // We activate userdefined commands here as the xml will only enable this component in setup mode
+                        // We activate user defined commands here as the xml will only enable this component in setup mode
                         _userDefined.component.setActiveHandler(0);
 
                         PreSonus.PadSection.addCommand(commands, 8, "Transport", "Tap Tempo", PreSonus.PadSection.kCommandItemDirect, null, '#0000FF');
@@ -588,7 +584,7 @@ class Modes extends PreSonus.ControlSurfaceComponent {
                     } break;
                 case 'bank':
                     {
-                        Host.Console.writeLine(`Setting up bank mode for id: ${mode.id} index: ${mode.index}`);
+                        //Host.Console.writeLine(`Setting up bank mode on index: ${mode.index}`);
                         const items = [];
                         for(let ii = 0; ii < this.bankCount; ii++)
                             items.push ({"padIndex": ii, "value": ii, "color": Color.Bank[ii]});
@@ -598,7 +594,7 @@ class Modes extends PreSonus.ControlSurfaceComponent {
                     } break;
                 case 'loopedit':
                     {
-                        Host.Console.writeLine(`Setting up loopedit mode for id: ${mode.id} index: ${mode.index}`);
+                        //Host.Console.writeLine(`Setting up loopedit mode on index: ${mode.index}`);
                         const commands = [];
                         PreSonus.PadSection.addCommand(commands, 0, "Zoom", "Zoom to Loop", 0, null, '#00FFFF');
 
@@ -629,7 +625,7 @@ class Modes extends PreSonus.ControlSurfaceComponent {
             mode.init(index, padComponent);
             mode.addActiveRenderHandler( function(host, root) {
                 Host.Console.writeLine(`Setting active render handler for ${mode.id}`);
-                Host.Console.writeLine(`We're going to go check if host.modes.getCurrentDevicePadMode().id === 'session' (true/false): ` + (host.modes.getCurrentDevicePadMode().id === 'session'));
+                //Host.Console.writeLine(`Checking if host.modes.getCurrentDevicePadMode().id === session: ` + (host.modes.getCurrentDevicePadMode().id === 'session'));
                 if( host.modes.getCurrentDevicePadMode().id === 'session')
                     host.modes.params.scene_button.color.fromString(mode.color);
             });
